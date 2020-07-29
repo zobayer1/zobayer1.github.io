@@ -1,5 +1,31 @@
-_site
-.sass-cache
-.jekyll-cache
+# Jekyll
+_site/
+*-cache/
 .jekyll-metadata
-vendor
+
+# Ruby
+.bundle/
+.byebug_history
+.ruby-gemset
+.ruby-version
+*.gem
+Gemfile.lock
+
+# Files
+.analysis
+.DS_Store
+*.swp
+*~
+
+# Folders
+vendor/
+bin/
+coverage
+gh-pages/
+pkg/
+test/dest
+tmp/*
+
+# IDE
+.vscode/
+.editorconfig
