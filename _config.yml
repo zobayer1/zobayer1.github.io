@@ -18,21 +18,30 @@
 # You can create any custom variable you would like, and they will be accessible
 # in the templates via {{ site.myvariable }}.
 
-title: ":(){ :|:& }:"
+title: 🅶 🅻 🅸 🆃 🅲 🅷 🅵 Ǝ 🆂 🆃
+author: Zobayer Hasan
 email: zobayer1@gmail.com
+permalink: 'p/:year-:month-:day-:title/'
 description: >- # this means to ignore newlines until "baseurl:"
-  Write an awesome description for your new site here. You can edit this
-  line in _config.yml. It will appear in your document head meta (for
-  Google search results) and in your feed.xml site description.
+  Confessions of a software engineer.
 baseurl: "" # the subpath of your site, e.g. /blog
 url: "https://zobayer.net" # the base hostname & protocol for your site, e.g. http://example.com
 twitter_username: zobayertt
 github_username:  zobayer1
 
+
 # Build settings
-theme: minima
+
+theme:
 plugins:
   - jekyll-feed
+  - jekyll-seo-tag
+
+
+# Post settings
+
+show_excerpts: true
+
 
 # Exclude from processing.
 # The following items will not be processed, by default.
