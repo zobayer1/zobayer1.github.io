@@ -23,7 +23,7 @@ author: Zobayer Hasan
 email: zobayer1@gmail.com
 permalink: 'p/:year-:month-:day-:title/'
 description: >- # this means to ignore newlines until "baseurl:"
-  Blogging software engineering, open source projects, programming ideas, tips and tricks, and cool stuffs.
+  Articles on software engineering best practices, open source projects, programming ideas, tips and tricks, and cool coding stuffs.
 baseurl: "" # the subpath of your site, e.g. /blog
 url: "https://zobayer.net" # the base hostname & protocol for your site, e.g. http://example.com
 twitter_username: zobayertt
