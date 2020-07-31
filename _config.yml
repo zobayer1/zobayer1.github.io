@@ -41,6 +41,7 @@ plugins:
 # Post settings
 
 show_excerpts: true
+future: true
 
 
 # Google Analytics
