@@ -2,7 +2,7 @@
 layout: post
 title:  "Install different versions of Python from source in Fedora"
 date:   2020-08-01 22:01:01 +0600
-categories: blog update
+categories: python fedora install
 ---
 Python 3.8 comes as a default with Fedora 32. However, sometimes you may wish to install other versions for development and test purposes. In this post, I will show you how to install Python 3.7 and 3.6 on Fedora 32.
 
