@@ -6,7 +6,7 @@ categories: black pre-commit code-format python
 ---
 Finally, we've decided to adopt [Black](https://github.com/psf/black) code styling for all our python projects. I wanted to do this without making too many side-changes to the project file structures, so I went with another python tool called [Pre-Commit](https://pre-commit.com/).
 
-Although not everyone may like how black modifies the source code, especially around some of the PEP8 guidelines and quotes, I think it is necessary to maintain a single code styling throughout the entire project. The main advantage of black is that, you can write code in whatever style you want and then black will reformat the code to a single style before you commit your files.
+Although not everyone may like how black modifies the source code, especially around some of the `PEP8` guidelines and quotes, I think it is necessary to maintain a single code styling throughout the entire project. The main advantage of black is that, you can write code in whatever style you want and then black will reformat the code to a single style before you commit your files.
 
 Biggest issue developers faces with black is the use of double quotes everywhere. In fact, this is probably the biggest controversy in black's history. I must say, the entire [discussion](https://github.com/psf/black/issues/118) was pretty hilarious to read. Many Python developers prefer single quotes for quoting string literals. However, as most of the developers in my team came from C++ and Java backgrounds, they actually preferred double quotes over single quotes.
 
@@ -90,7 +90,7 @@ All done! ✨ 🍰 ✨
 27 files reformatted, 3 files left unchanged.
 {% endhighlight %}
 
-## Further configruations
+## Further configurations
 You can add a `pyproject.toml` file and include additional configurations for black. For example:
 
 {% highlight toml %}
@@ -132,7 +132,7 @@ black....................................................................Passed
 Each time your commit fails, it will tell you that there were some changes made by one or more pre-commit rules. Just add the changed files and commit again. Alternatively, you can run `pre-commit run` first and then try to commit.
 
 ## Excluding inspections in your IDEs
-If you are using PyCharm, you can go to editor inspection configuraiton and exclude following `Pep8` warnings
+If you are using PyCharm, you can go to editor inspection configurations and exclude following `PEP8` warnings
 
 - `E203`
 - `E266`
