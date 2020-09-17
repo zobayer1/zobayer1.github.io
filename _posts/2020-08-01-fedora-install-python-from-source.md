@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "Install different versions of Python from source in Fedora"
+title:  Install Different Versions of Python from Source
 date:   2020-08-01 22:01:01 +0600
 categories: python fedora install
 ---

@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "Design Better URLs"
+title:  Design Better URLs
 date:   2020-09-17 14:01:01 +0600
 categories: restful api url guideline
 ---

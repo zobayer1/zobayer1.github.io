@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "First post!!!"
+title:  First post!!!
 date:   2020-07-31 23:01:01 +0600
 categories: blog update
 ---
