@@ -19,6 +19,8 @@ In part 1 of this series, we will focus on:
 
 ### Preparing project directory
 
+#### Add initial files
+
 Alright, let's start by creating our project's root directory, let's call it `flask-tutorial`. All our project files will reside within this directory. Let's quickly create three essential files within this directory:
 
 * `README.md`: A README file. It often serves the purpose of an introductory page for the project. We should include developer instructions in this file. [Here's an example README file](https://raw.githubusercontent.com/zobayer1/flask-tutorial/main/README.md).
@@ -36,6 +38,8 @@ At this point, our project directory will look like this:
 
 {% endhighlight %}
 
+#### Initialize Git
+
 Now we can `git init` and add our favorite remote origin. When you open a new repository in github, bitbucket, etc, they will include the instructions to add remote origins to your local repository. Just follow those steps. Let's add our first commit:
 
 {% highlight bash %}
@@ -44,5 +48,17 @@ Now we can `git init` and add our favorite remote origin. When you open a new re
     git commit -am "Initial commit"
     git push -u origin main
 
+{% endhighlight %}
+
+#### Initialize virtualenv
+
+As a server application, it is highly unlikely that we will make this server compatible with a lot of different python versions or platforms. However, build specifications can be changed anytime later on. Let's create our virtual environment with Python 3.8:
+
 {% highlight bash %}
 
+    python3.8 -m venv venv
+    source venv/bin/activate
+    pip install --upgrade pip
+    pip install wheel setuptools-scm
+
+{% endhighlight %}
