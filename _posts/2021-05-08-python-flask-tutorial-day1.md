@@ -1,7 +1,7 @@
 ---
 layout: post
-title:  Professional RESTful Application Development with Python Flask, Part 1
-date:   2021-05-08 12:01:01 +0600
+title:  RESTful Application Development with Python Flask, Part 1
+date:   2021-05-08 05:00:00 +0600
 categories: python flask restful api professional
 ---
 [Flask](https://pypi.org/project/Flask/) is a popular micro-framework written in Python. It has a very small core and it is very easy to extend. There are barely any restrictions or fixed structures for Flask framework, which means, it is very easy to mess up your application. In this tutorial series, I will try to show you how to build a Flask RESTful application from scratch.
@@ -28,17 +28,21 @@ Alright, let's start by creating our project's root directory, let's call it `fl
 At this point, our project directory will look like this:
 
 {% highlight bash %}
-flask-tutorial
-├── .gitignore
-├── LICENSE
-└── README.md
+
+    flask-tutorial
+    ├── .gitignore
+    ├── LICENSE
+    └── README.md
+
 {% endhighlight %}
 
 Now we can `git init` and add our favorite remote origin. When you open a new repository in github, bitbucket, etc, they will include the instructions to add remote origins to your local repository. Just follow those steps. Let's add our first commit:
 
 {% highlight bash %}
-git add . --all
-git commit -am "Initial commit"
-git push -u origin main
+
+    git add . --all
+    git commit -am "Initial commit"
+    git push -u origin main
+
 {% highlight bash %}
 
