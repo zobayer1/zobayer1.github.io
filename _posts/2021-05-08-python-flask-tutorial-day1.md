@@ -320,13 +320,12 @@ We are now ready to move on to the new section, creating our Flask application.
 
 ### Create a Flask application
 
-We will create a few files that will help define our Flask application.
+We will create a few files that will help to define our Flask application.
 
 **`myapi/config.py`:**
 
 Behavior of a Flask application can be controlled by a number of [configuration parameters](https://flask.palletsprojects.com/en/1.1.x/config). A common practice is to load these configurations from a file or a python object instead of manually updating Flask's `app.config` dictionary. A lot of example applications tend to create several different configuration classes in `config.py` file for various environments such as `development`, `production` and `testing`. But this is not necessary, because a Flask application can only run with one environment configuration. Which means we are creating multiple classes that are never going to be used. A better approach is to use `config.py` file as a set of default configurations, or a way of loading custom environment variables into the application. Later we will see how we can use instance specific configurations to load configurations for different environments.
 
-`myapi/config.py`
 ```python
 # -*- coding: utf-8 -*-
 import os
@@ -339,7 +338,6 @@ SECRET_KEY = os.getenv("FLASK_SECRET", "bb9ba2817ef62e261d3adaf90c2727bb").encod
 
 This is going to be our script for creating the actual Flask application. We will enrich this file in future as we add more features to our application.
 
-`myapi/app.py`
 ```python
 # -*- coding: utf-8 -*-
 import os
@@ -371,7 +369,6 @@ We will talk about `instance_relative_config` in a later section.
 
 A simple script exposing an app object which can be used as `FLASK_APP` parameter.
 
-`myapi/wsgi.py`
 ```python
 # -*- coding: utf-8 -*-
 import os
@@ -381,3 +378,213 @@ from myapi.app import create_app
 app = create_app(os.getenv("FLASK_ENV", "development"))
 ```
 
+**`myapi/manage.py`:**
+
+While this script isn't really necessary, it allows us to add custom scripts to our application. This can come handy if we want to add some CLI routines, for example, application initialization, database migration, dependency check, etc. We will use [click](https://click.palletsprojects.com/en/7.x) for this.
+
+```bash
+pip install click
+pip freeze > requirements.txt
+```
+
+Here's our initial `myapi/manage.py` file:
+```python
+# -*- coding: utf-8 -*-
+import os
+
+import click
+from flask.cli import FlaskGroup
+
+from myapi.app import create_app
+
+
+def create_cli_app():
+    return create_app(os.getenv("FLASK_ENV", "development"))
+
+
+@click.group(cls=FlaskGroup, create_app=create_cli_app)
+def cli():
+    """Management interface for flask-tutorial"""
+    pass
+
+
+if __name__ == "__main__":
+    cli()
+```
+
+We will need to make some adjustments in `setup.py` file for this to work. Update `install_dependencies` list:
+```python
+install_dependencies = [
+    "click",
+    "flask-cors",
+    "flask-restful",
+    "python-dotenv",
+]
+```
+
+Also, let's add `entry_points` argument to `setup()`:
+```python
+setup(
+    ...
+    entry_points={
+        "console_scripts": [
+            "myapi = myapi.manage:cli",
+        ],
+    },
+    ...
+)
+```
+
+**`.flaskenv`:**
+
+Our Flask application can take advantage of python-dotenv. We can add environment variables that we need frequently in a `.env` file which will be automatically picked up by the application when we are running a development server. Let's add a few environment variables:
+
+```bash
+export FLASK_ENV=development
+export FLASK_APP=myapi.wsgi:app
+export FLASK_SECRET=bb9ba2817ef62e261d3adaf90c2727bb
+```
+
+Note that, this file should be excluded from git. This file will not be used when we are testing with `tox` or running a production server with wsgi tools such as `gunicorn`.
+
+Let's test what we've done so far. Install the application in editable mode.
+
+```bash
+pip install -e .
+pip freeze > requirements.txt
+```
+Note that, this will also add flask-tutorial in `requirements.txt` file. It is generally a good idea to remove this manually before committing to git.
+
+Try cli commands:
+
+```bash
+myapi --help
+```
+
+We should see output like this:
+
+```bash
+Usage: myapi [OPTIONS] COMMAND [ARGS]...
+
+  Management interface for flask-tutorial
+
+Options:
+  --version  Show the flask version
+  --help     Show this message and exit.
+
+Commands:
+  routes  Show the routes for the app.
+  run     Run a development server.
+  shell   Run a shell in the app context.
+```
+
+In future, we may even add some more commands. Feel free to play around with these commands. Let's start a development server, we can do this by running
+
+```bash
+flask run -h 0.0.0.0 -p 5000
+or
+myapi run -h 0.0.0.0 -p 5000
+```
+
+Press CTRL+C to exit from the development server.
+
+### Adding tests
+
+Now that we have our application ready, it's time to add our tests. Let's start by creating a **`tests/conftest.py`** file which will hold our shared pytest fixtures.
+
+```python
+# -*- coding: utf-8 -*-
+import pytest
+
+from myapi.app import create_app
+
+
+@pytest.fixture(scope="module")
+def app():
+    """A flask app with testing configurations"""
+    return create_app("testing")
+
+
+@pytest.fixture(scope="module")
+def client(app):
+    """An HTTP test client to test api endpoints"""
+    return app.test_client()
+```
+
+Next, we will add some actual tests, let's create a **`tests/test_config.py`** with following tests:
+
+```python
+# -*- coding: utf-8 -*-
+from importlib.metadata import version
+
+
+def test_env(app):
+    """Test fails if app was not initialized with testing configurations"""
+    assert app.env == "testing"
+    assert app.testing
+
+
+def test_application_version(app):
+    """Test fails if importlib metadata could not be loaded from metadata"""
+    assert app.name == "flask-tutorial"
+    assert len(version(app.name)) > 0
+```
+
+Now try to run these tests using `pytest -s` in the terminal. We will see that the tests failed. Why? Becase we do not know anything about a `testing` environment. This leads to our next section: configuring our flask application with instance relative files.
+
+### Configuring a Flask application
+
+Let's first create an `instance` directory at the root of our project. This directory will contain the actual configuration values for different environments. Note that, we should keep this directory out of git so that sensitive information don't get exposed.
+
+Let's create a few different configuration files:
+
+**`instance/development/application.cfg`:**
+```python
+ENV = "development"
+DEBUG = True
+TESTING = False
+```
+
+**`instance/production/application.cfg`:**
+```python
+ENV = "production"
+DEBUG = False
+TESTING = False
+```
+
+**`instance/testing/application.cfg`:**
+```python
+ENV = "testing"
+DEBUG = False
+TESTING = True
+```
+
+In future, we will add a lot more things in these files, but for now, these are sufficient. Now, let's try to run those tests again:
+
+```bash
+tox --recreate -e py38
+```
+
+The output should look something like:
+```bash
+collected 2 items                                                                                                                                                                              
+
+tests/test_config.py ..                                                                                                                                                                  [100%]
+
+----------- coverage: platform linux, python 3.8.9-final-0 -----------
+Name                Stmts   Miss  Cover   Missing
+-------------------------------------------------
+myapi/__init__.py       0      0   100%
+myapi/app.py           14      0   100%
+myapi/config.py         3      0   100%
+-------------------------------------------------
+TOTAL                  17      0   100%
+
+
+====================================================================================== 2 passed in 0.06s =======================================================================================
+___________________________________________________________________________________________ summary ____________________________________________________________________________________________
+  py38: commands succeeded
+  congratulations :)
+```
+
+This is great!! Now we are ready to add our first REST endpoint.
