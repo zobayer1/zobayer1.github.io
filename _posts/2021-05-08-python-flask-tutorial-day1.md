@@ -182,7 +182,7 @@ repos:
     -   id: black
 ```
 
-We have added some hooks such as `end-of-file-fixer`, `trailing-whitespace`, `check-manifest` and `black`. Now, we do not have to worry too much about code styling, `black` will convert our code to a standard python style that is followed by the majority of python community. I have discussed about code styling with black briefly in [this post]({% post_url 2020-08-23-adopting-black-code-formatter %}). [Don't forget to check official github to learn more about black](https://github.com/psf/black).
+We have added some hooks such as `end-of-file-fixer`, `trailing-whitespace`, `check-manifest` and `black`. Now, we do not have to worry too much about code styling, `black` will convert our code to a standard python style that is followed by the majority of python community. I have discussed about code styling with black briefly in [this post]({% post_url 2020-08-23-adopting-black-code-formatter %}). Don't forget to check official github to learn more about [black](https://github.com/psf/black).
 
 We need to add one more file named **`pyproject.toml`**. This file allows us to add configurations from non-build development tools to a single file which is very convenient.
 
@@ -588,3 +588,161 @@ ________________________________________________________________________________
 ```
 
 This is great!! Now we are ready to add our first REST endpoint.
+
+### Adding our first endpoint
+
+We will be adding a simple health-check endpoint in our application. Endpoints like this are useful for a production environment as our load balancers can poll these endpoints to determine server states. First, let's add a test which will try to load `/myapi/health/status`. Create a python package named `test_health` within our `tests` package and add **`tests/test_health/test_status.py`** file:
+
+```python
+# -*- coding: utf-8 -*-
+import json
+
+
+def test_server_status_returns_success(client):
+    """Test fails if /myapi/health/status does not return success"""
+    response = client.get("/myapi/health/status")
+    assert response.status_code == 200
+    assert json.loads(response.data).get("status") == "running"
+```
+
+Let's run tests with `pytest -s` and this test should fail.
+
+Now let's add our blueprint that will expose `/myapi/health/status`. First, create a python package within `myapi` named `health`. Add our code for controller class inside **`myapi/health/status.py`**:
+
+```python
+# -*- coding: utf-8 -*-
+from importlib.metadata import version
+
+from flask import current_app as app
+from flask_restful import Resource
+
+
+class ServerStatus(Resource):
+    # noinspection PyMethodMayBeStatic
+    def get(self):
+        return {"server": f"{app.name} v{version(app.name)}", "status": "running"}, 200
+```
+
+My extending flask-restful's `Resource` class, we are letting it know that this class will be used to process HTTP requests. Let's register this class in the blueprint. To do so, we will add the following code in **`myapi/health/__init__.py`**:
+
+```python
+# -*- coding: utf-8 -*-
+from flask import Blueprint
+from flask_restful import Api
+
+from myapi.health.status import ServerStatus
+
+health_blueprint = Blueprint("health", __name__)
+api = Api(health_blueprint)
+
+api.add_resource(ServerStatus, "/status", endpoint="status")
+
+__all__ = ["health_blueprint"]
+```
+
+Finally, we need to register this blueprint in our app. This can be done by `app.register_blueprint` method in the `app.py` file:
+
+```python
+def initialize_blueprints(app):
+    app.register_blueprint(health_blueprint, url_prefix="/myapi/health")
+```
+
+Don't forget to add necessary import statements. Now, let's try to run the tests again.
+
+```bash
+tox -e py38
+```
+
+We should see success output:
+
+```bash
+collected 3 items                                                                                                                                                                              
+
+tests/test_config.py ..                                                                                                                                                                  [ 66%]
+tests/test_health/test_status.py .                                                                                                                                                       [100%]
+
+----------- coverage: platform linux, python 3.8.9-final-0 -----------
+Name                       Stmts   Miss  Cover   Missing
+--------------------------------------------------------
+myapi/__init__.py              0      0   100%
+myapi/app.py                  15      0   100%
+myapi/config.py                3      0   100%
+myapi/health/__init__.py       7      0   100%
+myapi/health/status.py         6      0   100%
+--------------------------------------------------------
+TOTAL                         31      0   100%
+
+
+====================================================================================== 3 passed in 0.09s =======================================================================================
+___________________________________________________________________________________________ summary ____________________________________________________________________________________________
+  py38: commands succeeded
+  congratulations :)
+```
+
+Fantastic!!! Now we are ready to explore the final segments of part 1, distributing and running the application.
+
+### Running the application server
+
+To start a development server, we can simply run:
+
+```bash
+flask run -h 0.0.0.0 -p 5000
+```
+
+If you navigate to http://localhost:5000/myapi/health/status, you should be able to get a JSON response similar to:
+
+```json
+{
+    "server": "flask-tutorial v0.1.0.dev0+d20210508",
+    "status": "running"
+}
+```
+
+However, we are not going to run a server with `flusk run` in production. Let's first create a wheel packaging by running:
+
+```bash
+python setup.py bdist_wheel
+```
+
+This should create a `.whl` file inside `dist/` directory. Copy this file to your favorite location. Copy your `instance/` directory here too. Contents of this directory should look like:
+
+```bash
+├── flask_tutorial-0.1.0.dev0+d20210508-py3-none-any.whl
+└── instance
+    ├── development
+    │   └── application.cfg
+    ├── production
+    │   └── application.cfg
+    └── testing
+        └── application.cfg
+```
+
+Note, you only need the subfolder for your target environment. We will select the `production` environment here.
+
+Next step, in your terminal, set your environment variables:
+
+```bash
+export FLASK_ENV=production
+export FLASK_APP=myapi.wsgi:app
+export FLASK_SECRET=bb9ba2817ef62e261d3adaf90c2727bb
+```
+
+Create a virtualenv and install the application:
+
+```bash
+python38 -m venv venv
+source venv/bin/activate
+pip install --upgrade pip
+pip install flask_tutorial-0.1.0.dev0+d20210508-py3-none-any.whl
+pip install gunicorn
+```
+
+Now that the dependencies are resolved, let's run the application server with gunicorn:
+
+```bash
+gunicorn -b 0.0.0.0:5000 -w 4 myapi.wsgi:app
+```
+
+Navigate to http://localhost:5000/myapi/health/status and you should see the same output as before.
+
+Finally, we are at the end of part 1 of this tutorial series. Full source code is available in [Github](https://github.com/zobayer1/flask-tutorial/tree/85c14356749c9959699f846675bae2da3923e7b5). Clone the repository and checkout at tag v0.1.0.
