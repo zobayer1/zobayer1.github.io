@@ -6,9 +6,7 @@ categories: python flask restful api professional
 ---
 [Flask](https://pypi.org/project/Flask) is a popular micro-framework written in Python. It has a very small core and it is very easy to extend. There are barely any restrictions or fixed structures for Flask framework, which means, it is also very easy to mess things up. In this tutorial series, I will try to demonstrate how to build a Flask RESTful application from scratch.
 
-There are already tons of tutorials out there on building Flask RESTful applications. Flask itself is very well documented. There are lots of options to quick-start a flask application, for example, [cookiecutter-flask-restful](https://github.com/karec/cookiecutter-flask-restful). These are all very good resources, and should be explored. However, almost none of them are suitable for starting a codebase that can support a long term real world projects. Having worked on several large Flask projects over the last couple of years, I think the best way to learn Flask application development is to start from scratch. The main goal of this tutorial series is to guide the reader though every steps of designing, testing, distributing a RESTful application using Flask. I will try to include as many references as possible along with tips on best practices where applicable.
-
-## Part 1
+There are already tons of tutorials out there on building Flask RESTful applications. Flask itself is very well documented. There are lots of options to quick-start a Flask application, for example, [cookiecutter-flask-restful](https://github.com/karec/cookiecutter-flask-restful). These are all very good resources, and should be explored. However, almost none of them are suitable for starting a codebase that can support a long term real world projects. Having worked on several large Flask projects over the last couple of years, I think the best way to learn Flask application development is to start from scratch. The main goal of this tutorial series is to guide the reader though every steps of designing, testing, distributing a RESTful application using Flask. I will try to include as many references as possible along with tips on best practices where applicable.
 
 In part 1 of this series, we will focus on:
 
@@ -19,9 +17,7 @@ In part 1 of this series, we will focus on:
 
 Complete source code for **part 1** can be checked out from [here](https://github.com/zobayer1/flask-tutorial).
 
-### Preparing project directory
-
-#### Add initial files
+### Add initial files
 
 Alright, let's start by creating our project's root directory, let's call it `flask-tutorial`. All our project files will reside within this directory. Let's quickly create three essential files within this directory:
 
@@ -38,7 +34,7 @@ flask-tutorial
 └── README.md
 ```
 
-#### Initialize Git
+### Initialize Git
 
 Now we can `git init` and add our favorite remote origin. Let's add our first commit:
 
@@ -51,7 +47,7 @@ git commit -am "Initial commit"
 git push -u origin main
 ```
 
-#### Initialize virtualenv
+### Initialize virtualenv
 
 As a server application, it is highly unlikely that we will make this server compatible with a lot of different python versions or platforms. However, build specifications can be changed anytime later on. Let's create our virtual environment with Python 3.8:
 
@@ -62,7 +58,7 @@ pip install --upgrade pip
 pip install wheel setuptools-scm
 ```
 
-#### Add packaging files
+### Add packaging files
 
 We should be able to create source and binary distribution packages for our project. In order to do so, we have to add a few files, namely, `setup.py`, `setup.cfg` and `MANIFEST.in` at the root of our project.
 
@@ -154,7 +150,7 @@ python setup.py sdist bdist_wheel
 
 Two new directories have been created: `build/` and `dist/`. Inside `dist/`, there will be a `.tar.gz` file and a `.whl` file. We can extract the `.tar.gz` file, and the `.whl` file can be installed with pip. They are our source package and wheel distribution respectively.
 
-#### Add code styling and testing suite
+### Add code styling and testing suite
 
 At this point, our project does not have any real source code. Let's fix this. Let's create two python packages named `myapi` and `tests`. A python package is a directory with a `__init__.py` file.
 
@@ -320,4 +316,68 @@ flask-tutorial
 └── tox.ini
 ```
 
-We are now ready to move on to the new section, creating our flask application.
+We are now ready to move on to the new section, creating our Flask application.
+
+### Create a Flask application
+
+We will create a few files that will help define our Flask application.
+
+**`myapi/config.py`:**
+
+Behavior of a Flask application can be controlled by a number of [configuration parameters](https://flask.palletsprojects.com/en/1.1.x/config). A common practice is to load these configurations from a file or a python object instead of manually updating Flask's `app.config` dictionary. A lot of example applications tend to create several different configuration classes in `config.py` file for various environments such as `development`, `production` and `testing`. But this is not necessary, because a Flask application can only run with one environment configuration. Which means we are creating multiple classes that are never going to be used. A better approach is to use `config.py` file as a set of default configurations, or a way of loading custom environment variables into the application. Later we will see how we can use instance specific configurations to load configurations for different environments.
+
+`myapi/config.py`
+```python
+# -*- coding: utf-8 -*-
+import os
+
+ENV = os.getenv("FLASK_ENV", "development")
+SECRET_KEY = os.getenv("FLASK_SECRET", "bb9ba2817ef62e261d3adaf90c2727bb").encode("utf-8")
+```
+
+**`myapi/app.py`:**
+
+This is going to be our script for creating the actual Flask application. We will enrich this file in future as we add more features to our application.
+
+`myapi/app.py`
+```python
+# -*- coding: utf-8 -*-
+import os
+
+from flask import Flask
+from flask_cors import CORS
+
+
+def create_app(instance_name, app_name="flask-tutorial"):
+    app = Flask(app_name, instance_path=os.path.join(os.getcwd(), "instance"), instance_relative_config=True)
+    app.config.from_object("myapi.config")
+    app.config.from_pyfile(f"{instance_name}/application.cfg", silent=True)
+    initialize_extensions(app)
+    initialize_blueprints(app)
+    return app
+
+
+def initialize_extensions(app):
+    CORS(app)
+
+
+def initialize_blueprints(app):
+    pass
+```
+
+We will talk about `instance_relative_config` in a later section.
+
+**`myapi/wsgi.py`:**
+
+A simple script exposing an app object which can be used as `FLASK_APP` parameter.
+
+`myapi/wsgi.py`
+```python
+# -*- coding: utf-8 -*-
+import os
+
+from myapi.app import create_app
+
+app = create_app(os.getenv("FLASK_ENV", "development"))
+```
+
