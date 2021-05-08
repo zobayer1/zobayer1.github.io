@@ -149,7 +149,7 @@ flask-tutorial
 Let's generate a source and wheel distribution to test that setup.py is working as expected:
 
 ```bash
-python sdist bdist_wheel
+python setup.py sdist bdist_wheel
 ```
 
 Two new directories have been created: `build/` and `dist/`. Inside `dist/`, there will be a `.tar.gz` file and a `.whl` file. We can extract the `.tar.gz` file, and the `.whl` file can be installed with pip. They are our source package and wheel distribution respectively.
@@ -186,7 +186,7 @@ repos:
     -   id: black
 ```
 
-We have added some hooks such as `end-of-file-fixer`, `trailing-whitespace`, `check-manifest` and `black`. Now, we do not have to worry too much about code styling, `black` will convert our code to a standard python style that is followed by the majority of python community. I have discussed about code styling with black briefly in {% post_url 2020-08-23-adopting-black-code-formatter %}. [Don't forget to check official github to learn more about black](https://github.com/psf/black).
+We have added some hooks such as `end-of-file-fixer`, `trailing-whitespace`, `check-manifest` and `black`. Now, we do not have to worry too much about code styling, `black` will convert our code to a standard python style that is followed by the majority of python community. I have discussed about code styling with black briefly in [this post]({% post_url 2020-08-23-adopting-black-code-formatter %}). [Don't forget to check official github to learn more about black](https://github.com/psf/black).
 
 We need to add one more file named `pyproject.toml`. This file allows us to add configurations from non-build development tools to a single file which is very convenient.
 
@@ -228,3 +228,96 @@ git add . --all
 pre-commit autoupdate
 pre-commit run --all-files
 ```
+
+Let's add our test frameworks. We will use `tox` and `pytest` for testing this project, and `coverage` to generate code coverage reports. Let's start by installing the dependencies:
+
+```bash
+pip install tox flake8 codecov pytest pytest-cov python-dotenv
+```
+
+So far we have added a few pip libraries in our venv, let's create a `requirements.txt` file to keep track of them:
+
+```bash
+pip freeze > requirements.txt
+```
+
+Note that `requirements.txt` file should not be manually modified, rather generated using commands like `pip freeze`. Our project does not depend on this file, but we will use this file to resolve test environment dependencies.
+
+We will need a `tox.ini` file to configure our test environments. For now, we will add Python 3.8, but other python environments can be easily added in a similar fashion.
+
+```ini
+[tox]
+envlist =
+    py38
+    lint
+
+[pytest]
+filterwarnings =
+    error::DeprecationWarning
+    error::PendingDeprecationWarning
+
+[flake8]
+max-line-length = 120
+select = B,C,E,F,W,T4,B9,B950
+ignore = E203,E266,E501,W503,D1
+
+[testenv]
+passenv = USERNAME
+commands = py.test --cov myapi {posargs} --cov-report term-missing
+deps = -rrequirements.txt
+
+[testenv:lint]
+basepython = python3.8
+commands = flake8 myapi tests
+deps = flake8
+```
+
+Let's add a `.coveragerc` file to configure code coverage:
+
+```conf
+[run]
+omit =
+    myapi/manage.py
+    myapi/version.py
+    myapi/wsgi.py
+
+[report]
+exclude_lines =
+    pragma: no cover
+    def __repr__
+    def __del__
+```
+
+Let's run tox and we should see it failing since we haven't added any tests yet.
+
+```bash
+tox --recreate
+```
+
+Note that, `--recreate` flag is necessary every time a new dependency is added. We can target specific test environments with `-e` parameter, for example: `tox -e py38`, or `tox -e lint`.
+
+Tests can also be run using `pytest -s` directly.
+
+At this point, our project directory should include these (not including gitignored files and directories):
+
+```bash
+flask-tutorial
+├── .coveragerc
+├── .gitignore
+├── LICENSE
+├── MANIFEST.in
+├── myapi
+│   ├── __init__.py
+│   └── version.py
+├── .pre-commit-config.yaml
+├── pyproject.toml
+├── README.md
+├── requirements.txt
+├── setup.cfg
+├── setup.py
+├── tests
+│   └── __init__.py
+└── tox.ini
+```
+
+We are now ready to move on to the new section, creating our flask application.
