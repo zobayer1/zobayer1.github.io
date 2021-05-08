@@ -167,7 +167,7 @@ pip install pre-commit
 pre-commit install
 ```
 
-To define some pre-commit hooks, let's create a file `.pre-commit-config.yaml`:
+To define some pre-commit hooks, let's create a file **`.pre-commit-config.yaml`**:
 
 ```yaml
 repos:
@@ -188,7 +188,7 @@ repos:
 
 We have added some hooks such as `end-of-file-fixer`, `trailing-whitespace`, `check-manifest` and `black`. Now, we do not have to worry too much about code styling, `black` will convert our code to a standard python style that is followed by the majority of python community. I have discussed about code styling with black briefly in [this post]({% post_url 2020-08-23-adopting-black-code-formatter %}). [Don't forget to check official github to learn more about black](https://github.com/psf/black).
 
-We need to add one more file named `pyproject.toml`. This file allows us to add configurations from non-build development tools to a single file which is very convenient.
+We need to add one more file named **`pyproject.toml`**. This file allows us to add configurations from non-build development tools to a single file which is very convenient.
 
 ```toml
 [build-system]
@@ -235,15 +235,15 @@ Let's add our test frameworks. We will use `tox` and `pytest` for testing this p
 pip install tox flake8 codecov pytest pytest-cov python-dotenv
 ```
 
-So far we have added a few pip libraries in our venv, let's create a `requirements.txt` file to keep track of them:
+So far we have added a few pip libraries in our venv, let's create a **`requirements.txt`** file to keep track of them:
 
 ```bash
 pip freeze > requirements.txt
 ```
 
-Note that `requirements.txt` file should not be manually modified, rather generated using commands like `pip freeze`. Our project does not depend on this file, but we will use this file to resolve test environment dependencies.
+Note that `requirements.txt` file should not be manually modified, rather generated using commands like `pip freeze`. Our project does not depend on this file, but we will use this file to resolve test environment dependencies. This file should be overwritten every time we add a new dependency.
 
-We will need a `tox.ini` file to configure our test environments. For now, we will add Python 3.8, but other python environments can be easily added in a similar fashion.
+We will need a **`tox.ini`** file to configure our test environments. For now, we will add Python 3.8, but other python environments can be easily added in a similar fashion.
 
 ```ini
 [tox]
@@ -272,7 +272,7 @@ commands = flake8 myapi tests
 deps = flake8
 ```
 
-Let's add a `.coveragerc` file to configure code coverage:
+Let's add a **`.coveragerc`** file to configure code coverage:
 
 ```conf
 [run]
