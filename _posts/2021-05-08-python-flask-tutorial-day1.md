@@ -122,7 +122,7 @@ setup_requires =
 
 **`MANIFEST.in`** is a manifest template file that contains instructions about how to generate the `MANIFEST` file, which is the exact list of files to include in our source distribution. Let's start with adding inclusion and exclusion rules for our project:
 
-{% highlight bash %}
+```bash
 exclude .pre-commit-config.yaml
 exclude .gitignore
 include requirements.txt
@@ -130,6 +130,6 @@ include README.md
 include .coveragerc
 include tox.ini
 recursive-include tests *.py
-{% endhighlight %}
+```
 
 Note that, we haven't created some of these files yet. Don't worry about these files now, we will be creating them in the next section.
