@@ -689,7 +689,7 @@ To start a development server, we can simply run:
 flask run -h 0.0.0.0 -p 5000
 ```
 
-If you navigate to http://localhost:5000/myapi/health/status, you should be able to get a JSON response similar to:
+If you navigate to [http://localhost:5000/myapi/health/status](http://localhost:5000/myapi/health/status), you should be able to get a JSON response similar to:
 
 ```json
 {
@@ -743,6 +743,6 @@ Now that the dependencies are resolved, let's run the application server with gu
 gunicorn -b 0.0.0.0:5000 -w 4 myapi.wsgi:app
 ```
 
-Navigate to http://localhost:5000/myapi/health/status and you should see the same output as before.
+Navigate to [http://localhost:5000/myapi/health/status](http://localhost:5000/myapi/health/status) and you should see the same output as before.
 
 Finally, we are at the end of part 1 of this tutorial series. Full source code is available in [Github](https://github.com/zobayer1/flask-tutorial/tree/85c14356749c9959699f846675bae2da3923e7b5). Clone the repository and checkout at tag v0.1.0.
