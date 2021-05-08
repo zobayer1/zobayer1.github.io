@@ -20,7 +20,7 @@ To install the libraries, run: `pip install black pre-commit`. I do not think we
 ## Generating a simple pre-commit config
 Create a file named `.pre-commit-config.yaml`. Here's a simple pre-commit configuration with black:
 
-{% highlight yaml %}
+```yaml
 repos:
 -   repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v3.2.0
@@ -35,32 +35,32 @@ repos:
     -   id: black
         language_version: python3.6
         exclude: setup.py
-{% endhighlight %}
+```
 
 You can check official documentations for other configuration options.
 
 ## Initialize pre-commit
 Once you've created the configuration file, make sure all its dependencies are up-to-date by running `pre-commit autoupdate`. You may see output like this:
 
-{% highlight bash %}
+```bash
 (venv) [zobayer@hyperion boing]$ pre-commit autoupdate
 Updating https://github.com/pre-commit/pre-commit-hooks ... [INFO] Initializing environment for https://github.com/pre-commit/pre-commit-hooks.
 updating v2.4.0 -> v3.2.0.
 Updating https://github.com/psf/black ... already up to date.
-{% endhighlight %}
+```
 
 Next step would be to install pre-commit hooks for your git repository. Run `pre-commit install` to set up git-hook scripts. On success, it will tell you something like this:
 
-{% highlight bash %}
+```bash
 (venv) [zobayer@hyperion boing]$ pre-commit install
 pre-commit installed at .git/hooks/pre-commit
-{% endhighlight %}
+```
 
 You can check its contents using `cat .git/hooks/pre-commit` and you can modify anything to your liking, although I'd recommend not to manually modify any hook.
 
 It's usually a good idea to run the hooks against all the files when adding new hooks (usually pre-commit will only run on the changed files during git hooks). Run `pre-commit run --all-files`. If any of these fails, it means pre-commit has modified some files and you have to add changes and commit again.
 
-{% highlight bash %}
+```bash
 (venv) [zobayer@hyperion boing]$ pre-commit run --all-files
 [INFO] Installing environment for https://github.com/pre-commit/pre-commit-hooks.
 [INFO] Once installed this environment will be reused.
@@ -88,12 +88,12 @@ black....................................................................Failed
 reformatted ... (truncated output)
 All done! ✨ 🍰 ✨
 27 files reformatted, 3 files left unchanged.
-{% endhighlight %}
+```
 
 ## Further configurations
 You can add a `pyproject.toml` file and include additional configurations for black. For example:
 
-{% highlight toml %}
+```toml
 [tool.black]
 line-length = 120
 target-version = ['py36', 'py37', 'py38']
@@ -112,14 +112,14 @@ exclude = '''
 | setup.py
 )/
 '''
-{% endhighlight %}
+```
 
 Do not forget to run `pre-commit run --all-files` again if you've modified any configuration.
 
 ## Commit your code
 Once all issues are resolved, you can commit normally.
 
-{% highlight bash %}
+```bash
 (venv) [zobayer@hyperion boing]$ git add . --all
 (venv) [zobayer@hyperion boing]$ git commit -am "Adopt Black"
 Trim Trailing Whitespace.................................................Passed
@@ -127,7 +127,7 @@ Fix End of Files.........................................................Passed
 Check Yaml...............................................................Passed
 Check for added large files..............................................Passed
 black....................................................................Passed
-{% endhighlight %}
+```
 
 Each time your commit fails, it will tell you that there were some changes made by one or more pre-commit rules. Just add the changed files and commit again. Alternatively, you can run `pre-commit run` first and then try to commit.
 
