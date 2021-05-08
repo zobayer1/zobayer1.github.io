@@ -66,7 +66,7 @@ pip install wheel setuptools-scm
 
 We should be able to create source and binary distribution packages for our project. In order to do so, we have to add a few files, namely, `setup.py`, `setup.cfg` and `MANIFEST.in` at the root of our project.
 
-**`setup.py`** is a python file, the presence of which is an indication that the package we are about to install has likely been packaged and distributed with Distutils, which is the standard for distributing Python Modules. Learn more about [writing setup scripts here](https://docs.python.org/3/distutils/setupscript.html). Let's start with a simple `setup.py` file for our project, feel free to change values in `setup()` as necessary:
+**`setup.py`** is a python file, the presence of which is an indication that the package we are about to install has likely been packaged and distributed with Distutils, which is the standard for distributing Python Modules. Learn more about [writing setup scripts here](https://docs.python.org/3/distutils/setupscript.html). Let's start with a simple `setup.py` file for our project, feel free to add or change values in `setup()` as necessary:
 
 ```python
 # -*- coding: utf-8 -*-
@@ -132,4 +132,99 @@ include tox.ini
 recursive-include tests *.py
 ```
 
-Note that, we haven't created some of these files yet. Don't worry about these files now, we will be creating them in the next section.
+Note that, we haven't created some of these files yet. Don't worry about these files now, we will be creating them in the next section. At this point, our directory should look like this:
+
+```bash
+flask-tutorial
+├── .gitignore
+├── instance
+├── LICENSE
+├── MANIFEST.in
+├── README.md
+├── setup.cfg
+├── setup.py
+└── venv
+```
+
+Let's generate a source and wheel distribution to test that setup.py is working as expected:
+
+```bash
+python sdist bdist_wheel
+```
+
+Two new directories have been created: `build/` and `dist/`. Inside `dist/`, there will be a `.tar.gz` file and a `.whl` file. We can extract the `.tar.gz` file, and the `.whl` file can be installed with pip. They are our source package and wheel distribution respectively.
+
+#### Add code styling and testing suite
+
+At this point, our project does not have any real source code. Let's fix this. Let's create two python packages named `myapi` and `tests`. A python package is a directory with a `__init__.py` file.
+
+Before adding any real source code, let's add some more files in the project root that will help with testing and code styling for the project. It is extremely important for a large project that our codebase remain consistent, both at source and functional level.
+
+First, we will add pre-commit, a python library to create pre-commit hooks. Pre-commit will run on every commit and make sure our source code is consistent. [Learn more about pre-commit](https://pre-commit.com). To install pre-commit, simply run:
+
+```bash
+pip install pre-commit
+pre-commit install
+```
+
+To define some pre-commit hooks, let's create a file `.pre-commit-config.yaml`:
+
+```yaml
+repos:
+-   repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v3.4.0
+    hooks:
+    -   id: end-of-file-fixer
+    -   id: trailing-whitespace
+-   repo: https://github.com/mgedmin/check-manifest
+    rev: "0.46"
+    hooks:
+    -   id: check-manifest
+-   repo: https://github.com/psf/black
+    rev: 21.4b2
+    hooks:
+    -   id: black
+```
+
+We have added some hooks such as `end-of-file-fixer`, `trailing-whitespace`, `check-manifest` and `black`. Now, we do not have to worry too much about code styling, `black` will convert our code to a standard python style that is followed by the majority of python community. I have discussed about code styling with black briefly in {% post_url 2020-08-23-adopting-black-code-formatter %}. [Don't forget to check official github to learn more about black](https://github.com/psf/black).
+
+We need to add one more file named `pyproject.toml`. This file allows us to add configurations from non-build development tools to a single file which is very convenient.
+
+```toml
+[build-system]
+requires = ["setuptools>=42", "wheel", "setuptools_scm[toml]>=3.4"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools_scm]
+write_to = "myapi/version.py"
+write_to_template = "# -*- coding: utf-8 -*-\n\n__version__ = '{version}'\n"
+version_scheme = "release-branch-semver"
+
+[tool.check-manifest]
+ignore = ["myapi/version.py"]
+
+[tool.black]
+line-length = 120
+include = '\.pyi?$'
+exclude = '''
+/(
+    \.eggs
+  | \.git
+  | \.pytest_cache
+  | \.tox
+  | \.venv
+  | scripts
+  | build
+  | dist
+)/
+'''
+```
+We have configured some of the tools that we have already added, for example, `setuptools_scm`. This allows us to find the package version automatically from git tags and commits. We will be using [semantic versioning](https://semver.org) for tagging in this project. Note that we are using a temporary file `myapi/version.py` to write the version string. This file does not need to be tracked in git.
+
+`pre-commit` will handle installing all of the hooks on its own. Simply run the following:
+
+```bash
+git add . --all
+pre-commit autoupdate
+pre-commit run --all-files
+```
