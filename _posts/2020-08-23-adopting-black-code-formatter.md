@@ -21,22 +21,20 @@ To install the libraries, run: `pip install black pre-commit`. I do not think we
 Create a file named `.pre-commit-config.yaml`. Here's a simple pre-commit configuration with black:
 
 {% highlight yaml %}
-
-    repos:
-    -   repo: https://github.com/pre-commit/pre-commit-hooks
-        rev: v3.2.0
-        hooks:
-        -   id: trailing-whitespace
-        -   id: end-of-file-fixer
-        -   id: check-yaml
-        -   id: check-added-large-files
-    -   repo: https://github.com/psf/black
-        rev: 19.10b0
-        hooks:
-        -   id: black
-            language_version: python3.6
-            exclude: setup.py
-
+repos:
+-   repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v3.2.0
+    hooks:
+    -   id: trailing-whitespace
+    -   id: end-of-file-fixer
+    -   id: check-yaml
+    -   id: check-added-large-files
+-   repo: https://github.com/psf/black
+    rev: 19.10b0
+    hooks:
+    -   id: black
+        language_version: python3.6
+        exclude: setup.py
 {% endhighlight %}
 
 You can check official documentations for other configuration options.
@@ -45,21 +43,17 @@ You can check official documentations for other configuration options.
 Once you've created the configuration file, make sure all its dependencies are up-to-date by running `pre-commit autoupdate`. You may see output like this:
 
 {% highlight bash %}
-
-    (venv) [zobayer@hyperion boing]$ pre-commit autoupdate
-    Updating https://github.com/pre-commit/pre-commit-hooks ... [INFO] Initializing environment for https://github.com/pre-commit/pre-commit-hooks.
-    updating v2.4.0 -> v3.2.0.
-    Updating https://github.com/psf/black ... already up to date.
-
+(venv) [zobayer@hyperion boing]$ pre-commit autoupdate
+Updating https://github.com/pre-commit/pre-commit-hooks ... [INFO] Initializing environment for https://github.com/pre-commit/pre-commit-hooks.
+updating v2.4.0 -> v3.2.0.
+Updating https://github.com/psf/black ... already up to date.
 {% endhighlight %}
 
 Next step would be to install pre-commit hooks for your git repository. Run `pre-commit install` to set up git-hook scripts. On success, it will tell you something like this:
 
 {% highlight bash %}
-
-    (venv) [zobayer@hyperion boing]$ pre-commit install
-    pre-commit installed at .git/hooks/pre-commit
-
+(venv) [zobayer@hyperion boing]$ pre-commit install
+pre-commit installed at .git/hooks/pre-commit
 {% endhighlight %}
 
 You can check its contents using `cat .git/hooks/pre-commit` and you can modify anything to your liking, although I'd recommend not to manually modify any hook.
@@ -67,61 +61,57 @@ You can check its contents using `cat .git/hooks/pre-commit` and you can modify 
 It's usually a good idea to run the hooks against all the files when adding new hooks (usually pre-commit will only run on the changed files during git hooks). Run `pre-commit run --all-files`. If any of these fails, it means pre-commit has modified some files and you have to add changes and commit again.
 
 {% highlight bash %}
+(venv) [zobayer@hyperion boing]$ pre-commit run --all-files
+[INFO] Installing environment for https://github.com/pre-commit/pre-commit-hooks.
+[INFO] Once installed this environment will be reused.
+[INFO] This may take a few minutes...
+Trim Trailing Whitespace.................................................Failed
+- hook id: trailing-whitespace
+- exit code: 1
+- files were modified by this hook
 
-    (venv) [zobayer@hyperion boing]$ pre-commit run --all-files
-    [INFO] Installing environment for https://github.com/pre-commit/pre-commit-hooks.
-    [INFO] Once installed this environment will be reused.
-    [INFO] This may take a few minutes...
-    Trim Trailing Whitespace.................................................Failed
-    - hook id: trailing-whitespace
-    - exit code: 1
-    - files were modified by this hook
+Fixing ... (truncated output)
 
-    Fixing ... (truncated output)
+Fix End of Files.........................................................Failed
+- hook id: end-of-file-fixer
+- exit code: 1
+- files were modified by this hook
 
-    Fix End of Files.........................................................Failed
-    - hook id: end-of-file-fixer
-    - exit code: 1
-    - files were modified by this hook
+Fixing ... (truncated output)
 
-    Fixing ... (truncated output)
+Check Yaml...........................................(no files to check)Skipped
+Check for added large files..............................................Passed
+black....................................................................Failed
+- hook id: black
+- files were modified by this hook
 
-    Check Yaml...........................................(no files to check)Skipped
-    Check for added large files..............................................Passed
-    black....................................................................Failed
-    - hook id: black
-    - files were modified by this hook
-
-    reformatted ... (truncated output)
-    All done! ✨ 🍰 ✨
-    27 files reformatted, 3 files left unchanged.
-
+reformatted ... (truncated output)
+All done! ✨ 🍰 ✨
+27 files reformatted, 3 files left unchanged.
 {% endhighlight %}
 
 ## Further configurations
 You can add a `pyproject.toml` file and include additional configurations for black. For example:
 
 {% highlight toml %}
-
-    [tool.black]
-    line-length = 120
-    target-version = ['py36', 'py37', 'py38']
-    include = '\.pyi?$'
-    exclude = '''
-    /(
-        \.eggs
-    | \.git
-    | \.pytest_cache
-    | \.tox
-    | \.venv
-    | schema_dir
-    | scripts
-    | build
-    | dist
-    | setup.py
-    )/
-    '''
-
+[tool.black]
+line-length = 120
+target-version = ['py36', 'py37', 'py38']
+include = '\.pyi?$'
+exclude = '''
+/(
+    \.eggs
+| \.git
+| \.pytest_cache
+| \.tox
+| \.venv
+| schema_dir
+| scripts
+| build
+| dist
+| setup.py
+)/
+'''
 {% endhighlight %}
 
 Do not forget to run `pre-commit run --all-files` again if you've modified any configuration.
@@ -130,15 +120,13 @@ Do not forget to run `pre-commit run --all-files` again if you've modified any c
 Once all issues are resolved, you can commit normally.
 
 {% highlight bash %}
-
-    (venv) [zobayer@hyperion boing]$ git add . --all
-    (venv) [zobayer@hyperion boing]$ git commit -am "Adopt Black"
-    Trim Trailing Whitespace.................................................Passed
-    Fix End of Files.........................................................Passed
-    Check Yaml...............................................................Passed
-    Check for added large files..............................................Passed
-    black....................................................................Passed
-
+(venv) [zobayer@hyperion boing]$ git add . --all
+(venv) [zobayer@hyperion boing]$ git commit -am "Adopt Black"
+Trim Trailing Whitespace.................................................Passed
+Fix End of Files.........................................................Passed
+Check Yaml...............................................................Passed
+Check for added large files..............................................Passed
+black....................................................................Passed
 {% endhighlight %}
 
 Each time your commit fails, it will tell you that there were some changes made by one or more pre-commit rules. Just add the changed files and commit again. Alternatively, you can run `pre-commit run` first and then try to commit.

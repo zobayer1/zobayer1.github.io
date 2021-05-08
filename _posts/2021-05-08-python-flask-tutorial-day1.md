@@ -31,41 +31,35 @@ Alright, let's start by creating our project's root directory, let's call it `fl
 
 At this point, our project directory will look like this:
 
-{% highlight console %}
-
-    flask-tutorial
-    ├── .gitignore
-    ├── LICENSE
-    └── README.md
-
+{% highlight bash %}
+flask-tutorial
+├── .gitignore
+├── LICENSE
+└── README.md
 {% endhighlight %}
 
 #### Initialize Git
 
 Now we can `git init` and add our favorite remote origin. Let's add our first commit:
 
-{% highlight console %}
-
-    git init
-    git remote add origin <origin_url>
-    git branch -M main
-    git add . --all
-    git commit -am "Initial commit"
-    git push -u origin main
-
+{% highlight bash %}
+git init
+git remote add origin <origin_url>
+git branch -M main
+git add . --all
+git commit -am "Initial commit"
+git push -u origin main
 {% endhighlight %}
 
 #### Initialize virtualenv
 
 As a server application, it is highly unlikely that we will make this server compatible with a lot of different python versions or platforms. However, build specifications can be changed anytime later on. Let's create our virtual environment with Python 3.8:
 
-{% highlight console %}
-
-    python3.8 -m venv venv
-    source venv/bin/activate
-    pip install --upgrade pip
-    pip install wheel setuptools-scm
-
+{% highlight bash %}
+python3.8 -m venv venv
+source venv/bin/activate
+pip install --upgrade pip
+pip install wheel setuptools-scm
 {% endhighlight %}
 
 #### Add packaging files
@@ -74,66 +68,61 @@ We should be able to create source and binary distribution packages for our proj
 
 **`setup.py`** is a python file, the presence of which is an indication that the package we are about to install has likely been packaged and distributed with Distutils, which is the standard for distributing Python Modules. Learn more about [writing setup scripts here](https://docs.python.org/3/distutils/setupscript.html). Let's start with a simple `setup.py` file for our project, feel free to change values in `setup()` as necessary:
 
-{% highlight python %}
+{% highlight py %}
+# -*- coding: utf-8 -*-
+from os import path
+from setuptools import find_packages, setup
 
-    # -*- coding: utf-8 -*-
-    from os import path
-    from setuptools import find_packages, setup
+setup_dependencies = [
+    "wheel",
+    "setuptools-scm",
+]
 
-    setup_dependencies = [
-        "wheel",
-        "setuptools-scm",
-    ]
+install_dependencies = [
+    "flask-cors",
+    "flask-restful",
+    "python-dotenv",
+]
 
-    install_dependencies = [
-        "flask-cors",
-        "flask-restful",
-        "python-dotenv",
-    ]
-
-    setup(
-        name="flask-tutorial",
-        url="https://github.com/zobayer1/flask-tutorial",
-        license="MIT",
-        author="Zobayer Hasan",
-        use_scm_version=True,
-        setup_requires=setup_dependencies,
-        packages=find_packages(exclude=["docs", "tests"]),
-        include_package_data=True,
-        zip_safe=True,
-        platforms=["posix"],
-        install_requires=install_dependencies,
-        classifiers=[
-            "Development Status :: 2 - Pre-Alpha",
-            "Environment :: Web Environment",
-            "Intended Audience :: Developers",
-            "License :: OSI Approved :: MIT License",
-            "Operating System :: POSIX",
-            "Programming Language :: Python :: 3.8",
-            "Topic :: Software Development :: Libraries :: Python Modules",
-        ],
-    )
-
+setup(
+    name="flask-tutorial",
+    url="https://github.com/zobayer1/flask-tutorial",
+    license="MIT",
+    author="Zobayer Hasan",
+    use_scm_version=True,
+    setup_requires=setup_dependencies,
+    packages=find_packages(exclude=["docs", "tests"]),
+    include_package_data=True,
+    zip_safe=True,
+    platforms=["posix"],
+    install_requires=install_dependencies,
+    classifiers=[
+        "Development Status :: 2 - Pre-Alpha",
+        "Environment :: Web Environment",
+        "Intended Audience :: Developers",
+        "License :: OSI Approved :: MIT License",
+        "Operating System :: POSIX",
+        "Programming Language :: Python :: 3.8",
+        "Topic :: Software Development :: Libraries :: Python Modules",
+    ],
+)
 {% endhighlight %}
 
 **`setup.cfg`** simply configures the behavior of the various setup commands for our project. This file is used in conjunction with `setup.py` file to supply metadata to the `setup()` function. We won't need to add much in `setup.cfg` file:
 
 {% highlight conf %}
+[metadata]
+license_files = LICENSE
 
-    [metadata]
-    license_files = LICENSE
-
-    [options]
-    setup_requires =
-        wheel==0.36.2
-        setuptools-scm==6.0.1
-
+[options]
+setup_requires =
+    wheel==0.36.2
+    setuptools-scm==6.0.1
 {% endhighlight %}
 
 **`MANIFEST.in`** is a manifest template file that contains instructions about how to generate the `MANIFEST` file, which is the exact list of files to include in our source distribution. Let's start with adding inclusion and exclusion rules for our project:
 
-{% highlight ini %}
-```
+{% highlight bash %}
 exclude .pre-commit-config.yaml
 exclude .gitignore
 include requirements.txt
@@ -141,7 +130,6 @@ include README.md
 include .coveragerc
 include tox.ini
 recursive-include tests *.py
-```
 {% endhighlight %}
 
 Note that, we haven't created some of these files yet. Don't worry about these files now, we will be creating them in the next section.
