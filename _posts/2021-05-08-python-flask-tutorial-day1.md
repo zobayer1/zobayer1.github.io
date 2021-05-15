@@ -6,18 +6,16 @@ categories: python flask restful api professional
 ---
 [Flask](https://pypi.org/project/Flask) is a popular micro-framework written in Python. It has a very small core and it is very easy to extend. There are barely any restrictions or fixed structures for Flask framework, which means, it is also very easy to mess things up. In this tutorial series, I will try to demonstrate how to build a Flask RESTful application from scratch.
 
-There are already tons of tutorials out there on building Flask RESTful applications. Flask itself is very well documented. There are lots of options to quick-start a Flask application, for example, [cookiecutter-flask-restful](https://github.com/karec/cookiecutter-flask-restful). These are all very good resources, and should be explored. However, almost none of them are suitable for starting a codebase that can support a long term real world projects. Having worked on several large Flask projects over the last couple of years, I think the best way to learn Flask application development is to start from scratch. The main goal of this tutorial series is to guide the reader though every steps of designing, testing, distributing a RESTful application using Flask. I will try to include as many references as possible along with tips on best practices where applicable.
+There are tools such as [cookiecutter-flask-restful](https://github.com/karec/cookiecutter-flask-restful) to quick-start a Flask application. However, having worked on several large Flask projects over the last couple of years, I think the best way to learn Flask application development is to start from scratch. The main goal of this tutorial series is to guide the reader through every step of designing, testing, distributing and deploying a Flask RESTful application. I will include tips on best practices where applicable.
 
 In part 1 of this series, we will focus on:
 
-* Preparing project directory
-* Creating and configuring an application
+* Preparing the project directory
+* Creating and configuring a flask application
 * Adding a resource endpoint and testing
-* Preparing distribution packages and testing
+* Preparing distribution packages and deployment
 
-Complete source code for **part 1** can be checked out from [here](https://github.com/zobayer1/flask-tutorial).
-
-### Add initial files
+## **Add initial files**
 
 Alright, let's start by creating our project's root directory, let's call it `flask-tutorial`. All our project files will reside within this directory. Let's quickly create three essential files within this directory:
 
@@ -34,20 +32,20 @@ flask-tutorial
 └── README.md
 ```
 
-### Initialize Git
+## **Initialize Git**
 
 Now we can `git init` and add our favorite remote origin. Let's add our first commit:
 
 ```bash
 git init
 git remote add origin <origin_url>
-git branch -M main
 git add . --all
 git commit -am "Initial commit"
+git branch -M main
 git push -u origin main
 ```
 
-### Initialize virtualenv
+## **Initialize virtualenv**
 
 As a server application, it is highly unlikely that we will make this server compatible with a lot of different python versions or platforms. However, build specifications can be changed anytime later on. Let's create our virtual environment with Python 3.8:
 
@@ -58,7 +56,7 @@ pip install --upgrade pip
 pip install wheel setuptools-scm
 ```
 
-### Add packaging files
+## **Add packaging files**
 
 We should be able to create source and binary distribution packages for our project. In order to do so, we have to add a few files, namely, `setup.py`, `setup.cfg` and `MANIFEST.in` at the root of our project.
 
@@ -133,7 +131,6 @@ Note that, we haven't created some of these files yet. Don't worry about these f
 ```bash
 flask-tutorial
 ├── .gitignore
-├── instance
 ├── LICENSE
 ├── MANIFEST.in
 ├── README.md
@@ -150,7 +147,7 @@ python setup.py sdist bdist_wheel
 
 Two new directories have been created: `build/` and `dist/`. Inside `dist/`, there will be a `.tar.gz` file and a `.whl` file. We can extract the `.tar.gz` file, and the `.whl` file can be installed with pip. They are our source package and wheel distribution respectively.
 
-### Add code styling and testing suite
+## **Add code styling and testing suite**
 
 At this point, our project does not have any real source code. Let's fix this. Let's create two python packages named `myapi` and `tests`. A python package is a directory with a `__init__.py` file.
 
@@ -208,7 +205,7 @@ exclude = '''
   | \.git
   | \.pytest_cache
   | \.tox
-  | \.venv
+  | venv
   | scripts
   | build
   | dist
@@ -316,9 +313,9 @@ flask-tutorial
 └── tox.ini
 ```
 
-We are now ready to move on to the new section, creating our Flask application.
+We are now ready to move on to the next section, creating our Flask application.
 
-### Create a Flask application
+## **Create a Flask application**
 
 We will create a few files that will help to define our Flask application.
 
@@ -488,7 +485,7 @@ myapi run -h 0.0.0.0 -p 5000
 
 Press CTRL+C to exit from the development server.
 
-### Adding tests
+## **Adding tests**
 
 Now that we have our application ready, it's time to add our tests. Let's start by creating a **`tests/conftest.py`** file which will hold our shared pytest fixtures.
 
@@ -532,7 +529,7 @@ def test_application_version(app):
 
 Now try to run these tests using `pytest -s` in the terminal. We will see that the tests failed. Why? Becase we do not know anything about a `testing` environment. This leads to our next section: configuring our flask application with instance relative files.
 
-### Configuring a Flask application
+## **Configuring a Flask application**
 
 Let's first create an `instance` directory at the root of our project. This directory will contain the actual configuration values for different environments. Note that, we should keep this directory out of git so that sensitive information don't get exposed.
 
@@ -589,7 +586,7 @@ ________________________________________________________________________________
 
 This is great!! Now we are ready to add our first REST endpoint.
 
-### Adding our first endpoint
+## **Adding our first endpoint**
 
 We will be adding a simple health-check endpoint in our application. Endpoints like this are useful for a production environment as our load balancers can poll these endpoints to determine server states. First, let's add a test which will try to load `/myapi/health/status`. Create a python package named `test_health` within our `tests` package and add **`tests/test_health/test_status.py`** file:
 
@@ -681,7 +678,7 @@ ________________________________________________________________________________
 
 Fantastic!!! Now we are ready to explore the final segments of part 1, distributing and running the application.
 
-### Running the application server
+## **Running the application server**
 
 To start a development server, we can simply run:
 
