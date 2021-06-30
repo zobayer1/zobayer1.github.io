@@ -2,7 +2,7 @@
 layout: post
 title:  RESTful Application Development with Python Flask, Part 1
 date:   2021-05-08 05:00:00 +0600
-categories: python flask restful api professional
+categories: published python flask restful api tutorial
 ---
 [Flask](https://pypi.org/project/Flask) is a popular micro-framework written in Python. It has a very small core and it is very easy to extend. There are barely any restrictions or fixed structures for Flask framework, which means, it is also very easy to mess things up. In this tutorial series, I will try to demonstrate how to build a Flask RESTful application from scratch.
 

@@ -2,7 +2,7 @@
 layout: post
 title:  Adopting Black Code Formatter
 date:   2020-08-23 12:01:01 +0600
-categories: black pre-commit code-style python
+categories: published code styling python black
 ---
 Finally, we've decided to adopt [Black](https://github.com/psf/black) code styling for all our python projects. I wanted to do this without making too many side-changes to the project file structures, so I went with another python tool called [Pre-Commit](https://pre-commit.com/).
 

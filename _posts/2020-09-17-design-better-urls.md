@@ -2,7 +2,7 @@
 layout: post
 title:  Design Better URLs
 date:   2020-09-17 14:01:01 +0600
-categories: restful api url guideline
+categories: published restful design api
 ---
 If you are designing RESTful APIs, designing the URLs is always a challenge. In this post, I tried to summarize a few key points that might help you to design better URLs.
 
