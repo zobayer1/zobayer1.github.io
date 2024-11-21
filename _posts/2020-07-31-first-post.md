@@ -4,7 +4,7 @@ title:  First post!!!
 date:   2020-07-31 23:01:01 +0600
 categories: published introduction
 ---
-It has been a really, really looooong time since I wrote anything in a blog. Last I wrote on [I, Me and Myself](http://zobayer.blogspot.com/) was sometime around November of 2015, and [my other blog](https://zobayer2009.wordpress.com) was even older. Life got busier and I had to take a step back from everything else.
+It has been a really, really looooong time since I wrote anything in a blog. Last I wrote on [I, Me and Myself](https://zobayer.blogspot.com/) was sometime around November of 2015, and [my other blog](https://zobayer2009.wordpress.com) was even older. Life got busier and I had to take a step back from everything else.
 
 Finally, some of my worries are now over, and I have a little bit of free time to get some things done outside of job and family life. So, I thought, why not start blogging again? Sure, no one's gonna read it, but that doesn't mean I can't work on my technical writing skills.
 
