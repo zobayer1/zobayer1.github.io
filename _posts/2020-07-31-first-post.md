@@ -1,21 +1,27 @@
 ---
-layout: post
-title:  First post!!!
+title: "Diving Back into Blogging: My Journey to GitHub Pages with Chirpy"
+author: zobayer
 date:   2020-07-31 23:01:01 +0600
-categories: published introduction
+categories: [Technology]
+tags: [Jekyll, Blogging, Markdown]
+render_with_liquid: true
 ---
-It has been a really, really looooong time since I wrote anything in a blog. Last I wrote on [I, Me and Myself](https://zobayer.blogspot.com/) was sometime around November of 2015, and [my other blog](https://zobayer2009.wordpress.com) was even older. Life got busier and I had to take a step back from everything else.
 
-Finally, some of my worries are now over, and I have a little bit of free time to get some things done outside of job and family life. So, I thought, why not start blogging again? Sure, no one's gonna read it, but that doesn't mean I can't work on my technical writing skills.
+#### Hello World!
 
-I didn't want to go back to blogger or wordpress, since those sites were really heavy, and I didn't want to get inside huge clumsy dashboards to get simple things done. I was looking for a simpler blogging media. So, I started asking around, and my good friend [Mishuk](https://twitter.com/syedarehaq) suggested that I should look into GitHub pages and Jekyll. Apparently, static site generation is a big thing these days in the web world (which I barely know anything about).
+After a long pause filled with the bustling demands of life, I've finally carved out a bit of free time. Why not dive back into writing? Sure, I might be my own solitary reader, but honing my technical writing skills still feels like a valuable endeavor.
 
-And guess what, people weren't joking when they said using Jekyll would be easier. I spent a few hours and this is the site I came up with. Best part is, I haven't even gotten into all that sass jazz yet. I am still working on adding features and customizing the `Minima` theme. However, I am quite familiar with markdown since I have to use that on a regular basis for writing documentations and project `README` files. Publish a post just by pushing it into a GitHub repo? Hell yeah!!!
+Dusting off the old platforms of Blogger and WordPress didn't appeal to me this time. I was on the lookout for something streamlined, something that didn't bury the joy of writing under clunky dashboards. That's when my friend [Mishuk](https://github.com/syedarehaq) steered me towards GitHub Pages and Jekyll. As it turns out, the world of static site generators has its own charm.
 
-Things I need to add to this site:
- - Pagination
- - Tag Processing
- - Add disqus comment
- - And some actual articles(!)
+Jumping into Jekyll turned out to be surprisingly straightforward. A few hours later, I brought this site to life. And the cherry on top? I ventured into this without any background in Ruby gems or delving into the complexities of sass. Yet, my comfort with markdown, thanks to endless project README files and documentation writing, paid off handsomely. The concept of pushing a post into a GitHub repo to publish it? Absolutely thrilling.
 
-Really hoping that I can keep it up this time.
+#### Why did I choose Chirpy
+
+[Chirpy](https://github.com/cotes2020/jekyll-theme-chirpy/tree/master) is a minimalist theme for github-pages. The bootstrapping was easy and straight forward. My main reasons for choosing this theme are
+
+1. **Dark Mode** out of the box!!!
+2. Easy analytics integration.
+3. Very active dev [community](https://github.com/cotes2020/jekyll-theme-chirpy/discussions).
+4. Did I mention **DARK MODE**???
+
+I'm excited for this new journey and the stories, challenges, and learnings I'll share along the way.

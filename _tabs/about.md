@@ -4,12 +4,12 @@ icon: fas fa-info-circle
 order: 4
 ---
 
-#### Hi! I am Zobayer
+#### Hi! I’m Zobayer.
 
-A headstrong open source enthusiast, writing codes for a living. Check me out on [LinkedIn](https://www.linkedin.com/in/zobayer-hasan/) for a full professional résumé.
+Just a tech guy knee-deep in code, making a living in the software engineering world. For the formal stuff, check my [LinkedIn](https://www.linkedin.com/in/zobayer-hasan/).
 
-Apart from coding, I enjoy visiting new places, reading, writing, playing video games, and riding my bike. Huge fan of synth-wave and electro-pop. Music is my jam.
+Off the clock, I'm all about exploring new places, devouring books, gaming until the break of dawn, and bike rides that clear the mind. Synth-wave and electro-pop fuel my coding marathons. Yes, music is serious business.
 
-I am writing about things I have been learning, the problems and challenges I have faced during software development, new and interesting technologies, programming ideas, tips and tricks, tutorials, and sometimes, very opinionated banters.
+Here, I spill ink on my coding adventures, the hurdles I stumble over, cool tech finds, and pro tips to save your sanity. Expect the occasional rant — all part of the charm.
 
-Let's connect!
+Wanna connect? Hit me up!
