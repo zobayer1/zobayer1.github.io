@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 A personal Jekyll blog (`zobayer.net`) built on the **Chirpy** theme, derived from
 [chirpy-starter](https://github.com/cotes2020/chirpy-starter). The theme is consumed as a
-**RubyGem** (`jekyll-theme-chirpy ~> 7.1`, see `Gemfile`), so this repo holds *content and
+**RubyGem** (`jekyll-theme-chirpy ~> 7.5`, see `Gemfile`), so this repo holds *content and
 config only* — it does not contain the theme's `_layouts`, `_includes`, `_sass`, or
 `_javascript` source. To inspect theme internals, run `bundle info --path jekyll-theme-chirpy`.
 
