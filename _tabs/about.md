@@ -13,3 +13,11 @@ Off the clock, I'm all about exploring new places, devouring books, gaming until
 Here, I spill ink on my coding adventures, the hurdles I stumble over, cool tech finds, and pro tips to save your sanity. Expect the occasional rant — all part of the charm.
 
 Wanna connect? Hit me up!
+
+---
+
+<p class="text-muted small">
+  Unless otherwise noted, the writing on this site is &copy; Zobayer Hasan and licensed under
+  <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> — you may
+  share and adapt it for non-commercial purposes, with attribution, under the same license.
+</p>

@@ -69,7 +69,8 @@ after the change is committed.
   providing self-hosted JS/CSS libraries (`assets.self_host.enabled: true`). Run
   `git submodule update --init` after cloning, or builds/CI will be missing vendored assets.
 - Media resources (avatar, post images, etc.) whose paths start with `/` are rewritten to the CDN
-  `https://assets.zobayer.net` (`cdn:` in `_config.yml`).
+  `https://storage.googleapis.com/glitchfest-pub` (`cdn:` in `_config.yml`) — a public
+  Google Cloud Storage bucket served over Google's own TLS.
 
 ## The npm / Node tooling caveat
 
