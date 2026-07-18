@@ -3,7 +3,7 @@ layout: post
 title:  Matrix Exponentiation for Fast Recurrences
 date:   2026-07-19 03:00:00 +0600
 categories: [Algorithms]
-tags: [competitive-programming, matrix-exponentiation, recurrence, dynamic-programming]
+tags: [Competitive Programming, Matrix Exponentiation, Recurrence, Dynamic Programming]
 math: true
 ---
 The name sounds like a linear-algebra chore, but this isn't about computing a matrix's power for its own sake. It's a technique that turns matrix powers into a way to jump straight to the n'th term of a recurrence — in logarithmic time, even for enormous `n`.

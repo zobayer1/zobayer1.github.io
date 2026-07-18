@@ -2,7 +2,8 @@
 layout: post
 title:  RESTful Application Development with Python Flask, Part 2
 date:   2021-05-09 05:00:00 +0600
-categories: published python flask restful api tutorial
+categories: [Backend]
+tags: [Python, Flask, REST, API, Tutorial]
 ---
 Welcome back!!! In [part 1]({% post_url 2021-05-08-python-flask-tutorial-day1 %}) of this series, we built a small Flask application from scratch — packaging files, a `create_app` factory, an `instance/` directory for environment-specific configs, a single health-check endpoint, and a tox-based test setup. Everything lived in a flat `myapi/` package, and we tagged it as `v0.1.0`.
 
