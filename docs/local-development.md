@@ -60,6 +60,7 @@ bash tools/run.sh
 
 Runs `jekyll serve` with live reload at <http://127.0.0.1:4000>. Useful flags:
 
+- `bash tools/run.sh -d` — also render posts in `_drafts/` (implies `--future`)
 - `bash tools/run.sh -H 0.0.0.0` — bind all interfaces (view from another device)
 - `bash tools/run.sh -p` — run in production mode
 
@@ -89,8 +90,8 @@ Create a file in `_posts/` named `YYYY-MM-DD-title-with-dashes.md` with front ma
 ---
 title: My Post Title
 date: 2026-05-27 10:00:00 +0600   # include the timezone offset
-categories: [Top Category, Sub Category]   # up to two, most general first
-tags: [tag-one, tag-two]                    # lowercase
+categories: [Category]                # broad topic (Chirpy allows up to two, most general first)
+tags: [Tag One, Tag Two]              # Title Case, one or more keywords
 ---
 ```
 

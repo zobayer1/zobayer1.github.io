@@ -22,6 +22,16 @@ bash tools/run.sh             # serve at http://127.0.0.1:4000
 Full setup, build, link-checking, post-writing, and deployment instructions are in
 **[docs/local-development.md](docs/local-development.md)**.
 
+## Tools
+
+Helper scripts live in [`tools/`](tools/):
+
+| Script | What it does |
+| --- | --- |
+| `bash tools/run.sh` | Serve locally with live reload at <http://127.0.0.1:4000>. Flags: `-d`/`--drafts` (also render `_drafts/`, implies `--future`), `-p`/`--production`, `-H <host>` (bind address), `-h`/`--help`. |
+| `bash tools/test.sh` | Production build, then `html-proofer` over `_site` (internal links only). Worth running before you push — CI does **not**. |
+| `bash tools/init.sh` | Inherited chirpy-starter bootstrap. **Destructive** — hard-resets to the theme release commit and wipes `_posts/`. Not used in normal workflow; kept for reference only. |
+
 ## License
 
 This repository is dual-licensed:
