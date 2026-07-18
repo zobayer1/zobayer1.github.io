@@ -6,13 +6,15 @@ order: 4
 
 #### Hi! I’m Zobayer.
 
-Just a tech guy knee-deep in code, making a living in the software engineering world. For the formal stuff, check my [LinkedIn](https://www.linkedin.com/in/zobayer-hasan/).
+Just a tech guy making a living in the world of software engineering.
 
-Off the clock, I'm all about exploring new places, devouring books, gaming until the break of dawn, and bike rides that clear the mind. Synth-wave and electro-pop fuel my coding marathons. Yes, music is serious business.
+Off the clock, I'm all about exploring new places, devouring books, gaming until the break of dawn, and bike rides that clear the mind. Synth-wave and electro-pop fuel my coding marathons.
 
-Here, I spill ink on my coding adventures, the hurdles I stumble over, cool tech finds, and pro tips to save your sanity. Expect the occasional rant — all part of the charm.
+Here, I spill ink on my coding adventures, the hurdles I stumble over, cool tech finds, and pro tips to save your sanity. Expect the occasional rant — all part of the charm. LLMs have made the job boring. Trying my best to keep myself entertained with new knowledge.
 
-Wanna connect? Hit me up!
+Long before this site, I kept an old blog — [I, ME AND MYSELF !!!](https://zobayer.blogspot.com/) — that many of you have read over the years. I'm slowly bringing some of those posts back to life here.
+
+Wanna connect? Find me on [X](https://x.com/zobayertt), [GitHub](https://github.com/zobayer1), and [LinkedIn](https://www.linkedin.com/in/zobayer-hasan/).
 
 ---
 
