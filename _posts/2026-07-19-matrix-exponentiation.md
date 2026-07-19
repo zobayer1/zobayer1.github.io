@@ -6,25 +6,23 @@ categories: [Algorithms]
 tags: [Competitive Programming, Matrix Exponentiation, Recurrence, Dynamic Programming]
 math: true
 ---
-The name sounds like a linear-algebra chore, but this isn't about computing a matrix's power for its own sake. It's a technique that turns matrix powers into a way to jump straight to the n'th term of a recurrence — in logarithmic time, even for enormous `n`.
+The name sounds like a linear-algebra chore, but this isn't about computing a matrix's power for its own sake. It's a technique that turns matrix powers into a way to jump straight to the n'th term of a recurrence in logarithmic time. Very handy when `n` is enormous.
 
-Sometimes a problem has an easy recurrence (e.g. a DP problem), but constraints make DP hopeless. Take the n'th Fibonacci number, `f(n) = f(n-1) + f(n-2)`. For small `n`, plain recursion or DP handles it fine. But what if the problem asks: *given 0 < n < 1000000000, find f(n) % 999983*? No amount of dynamic programming will save you here!
+Sometimes a problem has an easy recurrence (e.g. a dynamic programming problem), but constraints make DP hopeless. Take the n'th Fibonacci number, `f(n) = f(n-1) + f(n-2)`. For small `n`, plain recursion or DP handles it fine. But what if the problem asks: *given 0 < n < 1000000000, find f(n) % 999983*; DP will not save you here!
 
-That's where matrix exponentiation comes in. We'll get to why it works later — first, let's see how it represents a recurrence relation.
+That's where matrix exponentiation comes in. We'll get to how and why it works later, but first, let's see how it represents a recurrence relation.
 
-> This technique works only for **linear** recurrences — each term must be a linear combination of earlier terms (optionally plus a constant, as we'll see in Example 4). Matrix exponentiation cannot be used to directly compute non-linear recurrences (e.g. $f(n) = f(n-1)^2 + 3$). The requirement is that the transition between steps must be a strictly linear combination of the previous terms.
+> This technique works only for **linear** recurrences. Matrix exponentiation cannot be used to directly compute non-linear recurrences (e.g. $f(n) = f(n-1)^2 + 3$). The requirement is that the transition between steps must be a strictly linear combination of the previous terms.
 {: .prompt-warning }
 
-## **Prerequisites**
+## **Good to know beforehand**
 
-Before continuing, you need to know:
+- Basic matrix operations: Given two matrices, find their product. Or, given the product of two matrices and one of them, find the other.
+- Fast modular exponentiation: Given a matrix `M` of size `d x d`, find $(M^n \bmod m)$ in $O(d^3 \log n)$. Modulo `m` prevents overflow.
 
-- Given two matrices, how to find their product — or, given the product of two matrices and one of them, how to find the other.
-- Given a matrix `M` of size `d x d`, how to find $(M^n \bmod m)$ in $O(d^3 \log n)$ — the modulo `m` is usually there to keep the values from overflowing.
+## **Design state matrices**
 
-## **Patterns**
-
-What we need first is a recursive relation, and what we want is a matrix $M$ that can lead us from a set of already-known states to the desired next state. Suppose we know `k` states of a given recurrence relation and want to find the `(k+1)`'th state. Let $M$ be a `k x k` matrix, and build a `k x 1` matrix $A$ from the known states of the recurrence relation. Now we want a `k x 1` matrix $B$ that represents the set of next states, i.e. $M \times A = B$, as shown below:
+We start with a recurrence relation, and our goal is to find a matrix $M$ that carries a set of already-known states forward to the next state. Suppose we know `k` states of a given recurrence relation and want to find the `(k+1)`'th state. Let $M$ be a `k x k` matrix, and build a `k x 1` matrix $A$ from the known states of the recurrence relation. Now we want a `k x 1` matrix $B$ that represents the set of next states, i.e. $M \times A = B$, as shown below:
 
 $$
 M \times
@@ -81,23 +79,23 @@ $$
 \begin{bmatrix} f(n+1) \\ f(n) \end{bmatrix}
 $$
 
-If you are confused about how the matrix above is derived, you might try it this way. We know the multiplication of an `n x n` matrix $M$ with an `n x 1` matrix $A$ produces an `n x 1` matrix $B$, i.e. $M \times A = B$. The i'th element of the product $B$ is the product of the i'th row of $M$ with $A$. Here, the first element of $B$ is `f(n+1) = f(n) + f(n-1)`, so it is the product of the first row of $M$ and $A$. Let the first row of $M$ be `[x y]`. Then, by matrix multiplication:
+If you are confused about how the matrix above is derived, you might try it this way. We know the multiplication of an `n x n` matrix $M$ with an `n x 1` matrix $A$ produces an `n x 1` matrix $B$, i.e. $M \times A = B$. The i'th element of the product $B$ is the product of the i'th row of $M$ with $A$. Here, the first element of $B$ is `f(n+1) = f(n) + f(n-1)`, so it is the product of the first row of $M$ and $A$. Let the first row of $M$ be `[x y]`. Then, by matrix multiplication, we need `[x y]` such that:
 
 $$
-x \cdot f(n) + y \cdot f(n-1) = f(n+1) = f(n) + f(n-1) \implies x = 1,\ y = 1
+x \cdot f(n) + y \cdot f(n-1) = f(n+1)
 $$
 
-Thus the first row of $M$ is `[1 1]`. Similarly, let the second row of $M$ be `[x y]`:
+By setting `x = 1` and `y = 1`, we can see the equation `f(n+1) = f(n) + f(n-1)` is satisfied. So the first row of $M$ is `[1 1]`. Similarly, let the second row of $M$ be `[x y]`, which must satisfy:
 
 $$
-x \cdot f(n) + y \cdot f(n-1) = f(n) \implies x = 1,\ y = 0
+x \cdot f(n) + y \cdot f(n-1) = f(n)
 $$
 
-Thus the second row of $M$ is `[1 0]`.
+Here, setting `x = 1` and `y = 0` works. So the second row of $M$ is `[1 0]`.
 
 ### Example 2 — Constant coefficients
 
-Now let's make it a bit more complex: find `f(n) = a * f(n-1) + b * f(n-2)`, where `a` and `b` are constants. This tells us `f(n+1) = a * f(n) + b * f(n-1)`. By now it should be clear that the dimension of the matrices equals the number of dependencies — again 2 in this example. So $A$ and $B$ are both `2 x 1`:
+Now let's make it a bit more complex: find `f(n) = a * f(n-1) + b * f(n-2)`, where `a` and `b` are constants. This tells us `f(n+1) = a * f(n) + b * f(n-1)`. By now it should be clear that the dimension of the matrices equals the number of dependencies, again 2 in this example. So $A$ and $B$ are both `2 x 1`:
 
 $$
 A = \begin{bmatrix} f(n) \\ f(n-1) \end{bmatrix}
@@ -115,7 +113,7 @@ $$
 \begin{bmatrix} f(n+1) \\ \text{---} \end{bmatrix}
 $$
 
-And for the second item of $B$, i.e. `f(n)`, we already have it in $A$, so we just take it. The second row of $M$ is `[1 0]`, same as before:
+And for the second item of $B$, i.e. `f(n)`, we already have it in $A$, so we just keep it. The second row of $M$ is `[1 0]`:
 
 $$
 \begin{bmatrix} a & b \\ 1 & 0 \end{bmatrix}
@@ -127,7 +125,7 @@ $$
 
 Pretty simple, just like the previous one.
 
-### Example 3 — Gaps in the recurrence
+### Example 3 — Missing terms
 
 Now let's face a slightly more complex relation: find `f(n) = a * f(n-1) + c * f(n-3)`. Oops! A few moments ago all we saw were contiguous states, but here the state `f(n-2)` is missing. Now what?
 
@@ -141,13 +139,11 @@ $$
 \begin{bmatrix} f(n+1) \\ f(n) \\ f(n-1) \end{bmatrix}
 $$
 
-These entries are computed the same way as in Example 2. If you find it difficult, try it on pen and paper!
+These entries are computed the same way as in Example 2. Try it yourself with pen and paper!
 
 ### Example 4 — An added constant
 
 The plot thickens! This time the problem sneaks in a constant term: find `f(n) = f(n-1) + f(n-2) + c`, where `c` is a constant.
-
-This one is new. In everything we've seen so far, after multiplication each state in $A$ transforms into its next state in $B$:
 
 ```text
 f(n)   = f(n-1) + f(n-2) + c
@@ -156,7 +152,7 @@ f(n+2) = f(n+1) + f(n)   + c
 .................................  and so on
 ```
 
-So we can't get it through the previous fashion directly. But how about we add `c` as a state?
+So far we have seen that each value in state matrix `A` changes to a new value in state matrix `B`. But `c` is a constant that must not change. Nothing to worry, how about we add `c` as a state in both `A` and `B`?
 
 $$
 M \times
@@ -175,9 +171,15 @@ $$
 \begin{bmatrix} f(n+1) \\ f(n) \\ c \end{bmatrix}
 $$
 
-### Example 5 — Everything at once
+### Example 5 — Everything put together
 
-Let's put it all together: find a matrix suitable for `f(n) = a * f(n-1) + c * f(n-3) + d * f(n-4) + e`. I'll leave this one as an exercise. Here's the final matrix $M$ — check it against yours, and see if you can work out matrices $A$ and $B$ as well:
+Let's put it all together: find a matrix suitable for `f(n) = a * f(n-1) + c * f(n-3) + d * f(n-4) + e`. I'll leave this one as an exercise. Work out matrices $M$, $A$, and $B$ yourself, then expand the section below to check against your answer.
+
+> Take a look back at Example 3 and Example 4 if you get stuck.
+{: .prompt-tip }
+
+<details markdown="1">
+<summary>Reveal matrices M, A and B</summary>
 
 $$
 M =
@@ -190,8 +192,13 @@ a & 0 & c & d & 1 \\
 \end{bmatrix}
 $$
 
-> Take a look back at Example 3 and Example 4 if you get stuck.
-{: .prompt-tip }
+$$
+A = \begin{bmatrix} f(n) \\ f(n-1) \\ f(n-2) \\ f(n-3) \\ e \end{bmatrix}
+\qquad
+B = \begin{bmatrix} f(n+1) \\ f(n) \\ f(n-1) \\ f(n-2) \\ e \end{bmatrix}
+$$
+
+</details>
 
 ### Example 6 — Conditional (odd/even) recurrences
 
@@ -205,7 +212,19 @@ In short:
 f(n) = (n & 1) * f(n-1) + (!(n & 1)) * f(n-2)
 ```
 
-Here we can just split on the basis of parity and keep two different matrices — one for each case. As always, the state is $A = \begin{bmatrix} f(n) \\ f(n-1) \end{bmatrix}$, and we advance it to $\begin{bmatrix} f(n+1) \\ f(n) \end{bmatrix}$. Which matrix we use depends on the parity of the index we are producing, `n+1`.
+Here we can just split on the basis of parity and keep two different matrices; one for each case. As always, the state is
+
+$$
+A = \begin{bmatrix} f(n) \\ f(n-1) \end{bmatrix},
+$$
+
+and we advance it to
+
+$$
+B = \begin{bmatrix} f(n+1) \\ f(n) \end{bmatrix}.
+$$
+
+Which matrix we use depends on the parity of the index we are producing, `n+1`.
 
 When `n+1` is odd, `f(n+1) = f(n)`, so we just copy `f(n)` into the top slot:
 
@@ -225,7 +244,7 @@ So we simply alternate between $M_{\text{odd}}$ and $M_{\text{even}}$ as we step
 
 ### Example 7 — Coupled recurrences
 
-Sometimes we need to maintain more than one recurrence where they are interrelated. For example, let a recurrence relation be `g(n) = 2*g(n-1) + 2*g(n-2) + f(n)`, where `f(n) = 2*f(n-1) + 2*f(n-2)`. Here `g(n)` depends on `f(n)`, and both can be maintained in the same matrix — just with increased dimensions. Let's design $A$ and $B$, then find $M$:
+Sometimes we need to maintain more than one recurrence where they are interrelated. For example, let a recurrence relation be `g(n) = 2*g(n-1) + 2*g(n-2) + f(n)`, where `f(n) = 2*f(n-1) + 2*f(n-2)`. Here `g(n)` depends on `f(n)`, and both can be maintained in the same matrix with increased dimensions. Let's design $A$ and $B$, then find $M$:
 
 $$
 A = \begin{bmatrix} g(n) \\ g(n-1) \\ f(n+1) \\ f(n) \end{bmatrix}
@@ -245,7 +264,50 @@ M =
 \end{bmatrix}
 $$
 
-So these are the basic shapes of recurrence relations that can be solved with this simple technique.
+### Example 8 — Vector states (block matrices)
+
+Everything so far kept a single number per state. But sometimes a "state" is itself a bundle of numbers that evolve together. Suppose we advance a whole vector `G(t) = [x(t), y(t)]` at each step, where the two sequences are coupled and each also reaches two steps back:
+
+```text
+x(t) = x(t-1) + 2*y(t-1) + 3*x(t-2)
+y(t) = x(t-1) +   y(t-1) + 2*y(t-2)
+```
+
+We can write both lines at once as a single vector recurrence, `G(t) = P * G(t-1) + Q * G(t-2)`, where `P` holds the coefficients on the previous vector and `Q` those on the one before it:
+
+$$
+P = \begin{bmatrix} 1 & 2 \\ 1 & 1 \end{bmatrix}
+\qquad
+Q = \begin{bmatrix} 3 & 0 \\ 0 & 2 \end{bmatrix}
+$$
+
+Read them row by row: the first rows of `P` and `Q` together give `x(t)`, the second rows give `y(t)`.
+
+The trick is exactly the same as Example 1, we just stack *vector* states instead of scalar ones. So each entry of $A$ and $B$ is now a whole block:
+
+$$
+A = \begin{bmatrix} G(n) \\ G(n-1) \end{bmatrix}
+\qquad
+B = \begin{bmatrix} G(n+1) \\ G(n) \end{bmatrix}
+$$
+
+The objective matrix is built the same way as before, but with blocks in place of numbers: every coefficient becomes its coefficient block, every plain `1` becomes an identity block $I$, and every `0` becomes a zero block:
+
+$$
+M =
+\begin{bmatrix} P & Q \\ I & 0 \end{bmatrix}
+=
+\begin{bmatrix}
+1 & 2 & 3 & 0 \\
+1 & 1 & 0 & 2 \\
+1 & 0 & 0 & 0 \\
+0 & 1 & 0 & 0
+\end{bmatrix}
+$$
+
+Here `I` is the `2 x 2` identity matrix and `0` is the `2 x 2` zero matrix. Notice the second block-row, $\begin{bmatrix} I & 0 \end{bmatrix}$: it does not compute anything new, it just copies the entire `G(n)` block down into the next state, exactly like the `[1 0]` row in Example 1, only promoted from a single number to a whole block. This block-companion shape is what you reach for whenever one step has to advance a group of interdependent values at once.
+
+These are the basic shapes of recurrence relations that can be solved with this simple technique.
 
 ## **Analysis**
 
@@ -272,7 +334,7 @@ M \times M \times \begin{bmatrix} f(n) \\ f(n-1) \end{bmatrix}
 \end{aligned}
 $$
 
-So we finally get:
+Essentially:
 
 $$
 M^2 \times
@@ -281,7 +343,7 @@ M^2 \times
 \begin{bmatrix} f(n+2) \\ f(n+1) \end{bmatrix}
 $$
 
-Similarly, we can show:
+Similarly:
 
 $$
 \begin{aligned}
@@ -290,7 +352,7 @@ M^4 \times \begin{bmatrix} f(n) \\ f(n-1) \end{bmatrix} &= \begin{bmatrix} f(n+4
 \end{aligned}
 $$
 
-And in general:
+Generalized:
 
 $$
 M^k \times
@@ -315,7 +377,7 @@ Let's put all this to work on a real problem — [UVa 11651 — Krypton Number S
 
 - no two adjacent digits are equal,
 - there is no leading zero, and
-- the **score** — the sum of squared differences of adjacent digits — is exactly `s` (with $1 \le s \le 10^9$).
+- **score**: the sum of squared differences of adjacent digits is exactly `s` ($1 \le s \le 10^9$).
 
 The count is reported modulo $2^{32}$. For example, the number `1241` has a score of $(1-2)^2 + (2-4)^2 + (4-1)^2 = 1 + 4 + 9 = 14$.
 
@@ -331,13 +393,15 @@ $$
 \text{count} = \sum_{j=0}^{b-1} g(s, j) \pmod{2^{32}}
 $$
 
-This is linear, so matrix exponentiation applies — but with a twist. The score `s` is far too large to index states directly. The saving grace: appending one digit bumps the score by at most $(b-1)^2$, so $g(t, \cdot)$ depends only on the previous $C = (b-1)^2$ score levels. Pack those levels into one state vector, with `b` digit-counts at each level:
+This is linear, so matrix exponentiation applies, but with a twist. The score `s` is far too large to index states directly. The saving grace: appending one digit bumps the score by at most $(b-1)^2$, so $g(t, \cdot)$ depends only on the previous $C = (b-1)^2$ score levels. Pack those levels into one state vector, with `b` digit-counts at each level:
 
 $$
 V(t) = \begin{bmatrix} G(t) \\ G(t-1) \\ \vdots \\ G(t-C+1) \end{bmatrix},
 \qquad
 G(t) = \begin{bmatrix} g(t, 0) \\ g(t, 1) \\ \vdots \\ g(t, b-1) \end{bmatrix}
 $$
+
+This is the block-state pattern from Example 8, and the reason there are two matrices is that the recurrence lives at two nested scales. `G(t)` is the inner block for the `b` digit-counts at a *single* score level `t`, since `g(t, j)` at one level mixes all `b` possible ending digits. `V(t)` is the outer state that stacks the last `C` of those blocks, because appending a digit can push the score back by as much as `C` levels, so a single step must be able to reach all of them. In short: `G` captures "which digit," and `V` captures "how far back the score can jump."
 
 **The matrix.** A single block-companion matrix $M$ of size $Cb \times Cb$ advances the whole window by one score level, $V(t) = M \times V(t-1)$:
 
@@ -362,7 +426,7 @@ $$
 \end{cases}
 $$
 
-Now raise $M$ to the `s`'th power (fast exponentiation, every operation taken modulo $2^{32}$), apply it to the starting vector $V(0)$ — whose only non-zero block is $G(0) = \begin{bmatrix} 0 & 1 & 1 & \cdots & 1 \end{bmatrix}^{T}$ — and sum the entries of the top block $G(s)$. For `b = 6`, $M$ is only $150 \times 150$, so even `s` up to $10^9$ is just a handful of $O(\log s)$ multiplications.
+Now raise $M$ to the `s`'th power (fast exponentiation, every operation taken modulo $2^{32}$), apply it to the starting vector $V(0)$ whose only non-zero block is $G(0) = \begin{bmatrix} 0 & 1 & 1 & \cdots & 1 \end{bmatrix}^{T}$ and sum the entries of the top block $G(s)$. For `b = 6`, $M$ is only $150 \times 150$, so even `s` up to $10^9$ is just a handful of $O(\log s)$ multiplications.
 
 > Sample check: for base 6, score 1, the only way to total exactly 1 is a two-digit number whose digits differ by 1. Listing them — `10, 12, 21, 23, 32, 34, 43, 45, 54` — gives **9**, which matches the problem's sample output.
 {: .prompt-tip }
