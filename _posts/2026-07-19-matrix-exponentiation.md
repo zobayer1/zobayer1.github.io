@@ -6,7 +6,7 @@ categories: [Algorithms]
 tags: [Competitive Programming, Matrix Exponentiation, Recurrence, Dynamic Programming]
 math: true
 ---
-The name sounds like a linear-algebra chore, but this isn't about computing a matrix's power for its own sake. It's a technique that turns matrix powers into a way to jump straight to the n'th term of a recurrence in logarithmic time. Very handy when `n` is enormous.
+The title sounds like a linear-algebra exercise, but this isn't about computing a matrix's power for its own sake. It's a technique that turns matrix powers into a way to jump straight to the n'th term of a recurrence in logarithmic time. Very handy when `n` is enormous.
 
 Sometimes a problem has an easy recurrence (e.g. a dynamic programming problem), but constraints make DP hopeless. Take the n'th Fibonacci number, `f(n) = f(n-1) + f(n-2)`. For small `n`, plain recursion or DP handles it fine. But what if the problem asks: *given 0 < n < 1000000000, find f(n) % 999983*; DP will not save you here!
 
@@ -15,12 +15,12 @@ That's where matrix exponentiation comes in. We'll get to how and why it works l
 > This technique works only for **linear** recurrences. Matrix exponentiation cannot be used to directly compute non-linear recurrences (e.g. $f(n) = f(n-1)^2 + 3$). The requirement is that the transition between steps must be a strictly linear combination of the previous terms.
 {: .prompt-warning }
 
-## **Good to know beforehand**
+## **Good to Know**
 
 - Basic matrix operations: Given two matrices, find their product. Or, given the product of two matrices and one of them, find the other.
 - Fast modular exponentiation: Given a matrix `M` of size `d x d`, find $(M^n \bmod m)$ in $O(d^3 \log n)$. Modulo `m` prevents overflow.
 
-## **Design state matrices**
+## **Design State Matrices**
 
 We start with a recurrence relation, and our goal is to find a matrix $M$ that carries a set of already-known states forward to the next state. Suppose we know `k` states of a given recurrence relation and want to find the `(k+1)`'th state. Let $M$ be a `k x k` matrix, and build a `k x 1` matrix $A$ from the known states of the recurrence relation. Now we want a `k x 1` matrix $B$ that represents the set of next states, i.e. $M \times A = B$, as shown below:
 
@@ -141,7 +141,7 @@ $$
 
 These entries are computed the same way as in Example 2. Try it yourself with pen and paper!
 
-### Example 4 — An added constant
+### Example 4 — Additional constants
 
 The plot thickens! This time the problem sneaks in a constant term: find `f(n) = f(n-1) + f(n-2) + c`, where `c` is a constant.
 
@@ -200,7 +200,7 @@ $$
 
 </details>
 
-### Example 6 — Conditional (odd/even) recurrences
+### Example 6 — Conditional recurrences
 
 Sometimes a recurrence is given like this:
 
@@ -309,7 +309,7 @@ Here `I` is the `2 x 2` identity matrix and `0` is the `2 x 2` zero matrix. Noti
 
 These are the basic shapes of recurrence relations that can be solved with this simple technique.
 
-## **Analysis**
+## **The Exponentiation**
 
 Now that we've seen how matrix multiplication can maintain a recurrence relation, let's return to our first question: how does this help us solve recurrences over a huge range?
 
@@ -363,15 +363,7 @@ $$
 
 Thus we can get any state `f(n)` by simply raising the objective matrix $M$ to the power `n-1` in $O(d^3 \log n)$, where `d` is the dimension of the square matrix $M$. So even if `n = 1000000000`, this can be calculated pretty easily, as long as $d^3$ is sufficiently small.
 
-## **Related problems**
-
-- UVa 10229 — Modular Fibonacci
-- UVa 10870 — Recurrences
-- UVa 11651 — Krypton Number System
-- UVa 10754 — Fantastic Sequence
-- UVa 11551 — Experienced Endeavour
-
-## **An example: Krypton Number System**
+## **An Example: Krypton Number System**
 
 Let's put all this to work on a real problem — [UVa 11651 — Krypton Number System](https://onlinejudge.org/index.php?option=com_onlinejudge&Itemid=8&page=show_problem&problem=2698). It asks us to count the integers written in base `b` (with $2 \le b \le 6$) such that
 
@@ -381,7 +373,15 @@ Let's put all this to work on a real problem — [UVa 11651 — Krypton Number S
 
 The count is reported modulo $2^{32}$. For example, the number `1241` has a score of $(1-2)^2 + (2-4)^2 + (4-1)^2 = 1 + 4 + 9 = 14$.
 
-**The recurrence.** Let $g(t, j)$ be the number of valid numbers that end in digit `j` and have score exactly `t`. Appending a digit `j` after a digit `i` (with $i \neq j$) adds $(i-j)^2$ to the score, so:
+> Sample check: for base 6, score 1, the only way to total exactly 1 is a two-digit number whose digits differ by 1. Listing them — `10, 12, 21, 23, 32, 34, 43, 45, 54` — gives **9**.
+{: .prompt-tip }
+
+This problem can be solved following the patterns we have seen in Example 7 and 8 above. Expand the following sections for the hints.
+
+<details markdown="1">
+<summary>Expand to see the recurrence</summary>
+### The recurrence
+Let $g(t, j)$ be the number of valid numbers that end in digit `j` and have score exactly `t`. Appending a digit `j` after a digit `i` (with $i \neq j$) adds $(i-j)^2$ to the score, so:
 
 $$
 g(t, j) = \sum_{\substack{i = 0 \\ i \neq j}}^{b-1} g\!\left(t - (i-j)^2,\ i\right)
@@ -402,8 +402,12 @@ G(t) = \begin{bmatrix} g(t, 0) \\ g(t, 1) \\ \vdots \\ g(t, b-1) \end{bmatrix}
 $$
 
 This is the block-state pattern from Example 8, and the reason there are two matrices is that the recurrence lives at two nested scales. `G(t)` is the inner block for the `b` digit-counts at a *single* score level `t`, since `g(t, j)` at one level mixes all `b` possible ending digits. `V(t)` is the outer state that stacks the last `C` of those blocks, because appending a digit can push the score back by as much as `C` levels, so a single step must be able to reach all of them. In short: `G` captures "which digit," and `V` captures "how far back the score can jump."
+</details>
 
-**The matrix.** A single block-companion matrix $M$ of size $Cb \times Cb$ advances the whole window by one score level, $V(t) = M \times V(t-1)$:
+<details markdown="1">
+<summary>Expand to see the matrix</summary>
+### The matrix
+A single block-companion matrix $M$ of size $Cb \times Cb$ advances the whole window by one score level, $V(t) = M \times V(t-1)$:
 
 $$
 M =
@@ -427,9 +431,15 @@ $$
 $$
 
 Now raise $M$ to the `s`'th power (fast exponentiation, every operation taken modulo $2^{32}$), apply it to the starting vector $V(0)$ whose only non-zero block is $G(0) = \begin{bmatrix} 0 & 1 & 1 & \cdots & 1 \end{bmatrix}^{T}$ and sum the entries of the top block $G(s)$. For `b = 6`, $M$ is only $150 \times 150$, so even `s` up to $10^9$ is just a handful of $O(\log s)$ multiplications.
+</details>
 
-> Sample check: for base 6, score 1, the only way to total exactly 1 is a two-digit number whose digits differ by 1. Listing them — `10, 12, 21, 23, 32, 34, 43, 45, 54` — gives **9**, which matches the problem's sample output.
-{: .prompt-tip }
+## **Practice Problems**
+
+- UVa 10229 — Modular Fibonacci
+- UVa 10870 — Recurrences
+- UVa 11651 — Krypton Number System
+- UVa 10754 — Fantastic Sequence
+- UVa 11551 — Experienced Endeavour
 
 ---
 
