@@ -5,28 +5,62 @@ date:   2021-05-09 05:00:00 +0600
 categories: [Backend]
 tags: [Python, Flask, REST, API, Tutorial]
 ---
-Welcome back!!! In [part 1]({% post_url 2021-05-08-python-flask-tutorial-day1 %}) of this series, we built a small Flask application from scratch — packaging files, a `create_app` factory, an `instance/` directory for environment-specific configs, a single health-check endpoint, and a tox-based test setup. Everything lived in a flat `myapi/` package, and we tagged it as `v0.1.0`.
+Welcome back!!! In [part 1]({% post_url 2021-05-08-python-flask-tutorial-day1 %}) of this series, we built a small Flask application from scratch: packaging files, a `create_app` factory, an `instance/` directory for environment-specific configuration, and a single health-check endpoint under `myapi/endpoints/v1/`, all covered by a tox-based test setup. We tagged that state as `v0.1.0`.
 
-Part 2 picks up exactly where Part 1 ended. In this part, we will focus on:
+Part 2 picks up exactly where part 1 ended. Here we will:
 
-* Renaming the project (`flask-tutorial` → `flask-restful-boilerplate`) and reorganizing the package
-* Adding configurable logging with a queue listener and YAML-based config
-* Rotating logs on the server using the system `logrotate` utility
-* Adding Swagger UI to our API with `flask-apispec`
-* A small CLI command, a few more tests, and pinned dependencies
+* Pin dependencies in `setup.cfg` and trim `setup.py` to match
+* Grow the package into audience-grouped `endpoints/`, plus `commons/`, `models/`, `services/`, and `extensions/` layers
+* Add configurable logging driven by a YAML file and a non-blocking queue listener
+* Add a small CLI command and a few more tests
 
-By the end of this part, we will tag the result as `v0.2.0`. Full source code for this part is available in [Github](https://github.com/zobayer1/flask-restful-boilerplate/tree/845f3c60b8dbe0d10bf22aa8db6bed58f26ac330). Clone the repository and checkout at tag `v0.2.0` if you want to follow along with the final state.
+By the end of this part, we will tag the result as `v0.2.0`.
 
-## **Renaming the project**
+> **Where the code lives.** The full source is in the [flask-restful-boilerplate](https://github.com/zobayer1/flask-restful-boilerplate) repo, organized one branch per part. This post corresponds to the `part-2` branch. Check out `part-2` to explore the code shown here.
+{: .prompt-info }
 
-Before we add anything new, let's deal with a small annoyance. In part 1, the project name was `flask-tutorial`, which is descriptive but not a great name for something we are going to use as a reusable boilerplate. We are going to rename two separate things:
+## **Pinning dependencies in `setup.cfg`**
 
-* The **repository** on Github: `flask-tutorial` → `flask-restful-boilerplate`.
-* The **distribution package** that gets installed via pip: `flask-tutorial` → `myapi`.
+In part 1, we kept the dependency list inline in `setup.py` via `install_requires`, with loose, unversioned names. That's fine for a quick start, but it's risky for a server: a fresh `pip install` can silently pull a newer release of Flask or one of its transitive dependencies, and suddenly the code that ran yesterday behaves differently. Pinning each dependency to an exact version keeps the build reproducible; every environment, from a developer's laptop to CI to production, resolves the same package set, so we get real dev/prod parity and no surprise upgrades. `setup.cfg` is a friendlier home for those pins too. It's declarative, and it lets us split test and dev dependencies into `extras_require`. Let's move them there:
 
-The Python package directory (`myapi/`) does not need to change — we picked a good name already. But the metadata in `setup.py` and the Github URL do. We will trim down `setup.py` significantly while we are here, moving the dependency list out to `setup.cfg` (more on that next):
+**[`setup.cfg`](https://github.com/zobayer1/flask-restful-boilerplate/blob/part-2/setup.cfg):**
 
-**[`setup.py`](https://github.com/zobayer1/flask-restful-boilerplate/blob/845f3c60b8dbe0d10bf22aa8db6bed58f26ac330/setup.py):**
+```conf
+[metadata]
+license_files = LICENSE
+
+[options]
+install_requires =
+    click==8.1.8
+    Flask==3.0.3
+    Flask-Cors==5.0.0
+    gunicorn==23.0.0
+    importlib-metadata;python_version<"3.8"
+    logging-extras==0.4.0b0
+
+[options.extras_require]
+dev =
+    pre-commit>=3.5.0
+    python-dotenv>=1.0.1
+
+test =
+    flake8>=7.1.2
+    pytest>=8.3.5
+    pytest-cov>=5.0.0
+    tox>=4.25.0
+```
+
+A few things worth noting:
+
+* `click` is pinned explicitly now, since the CLI command we add later uses it directly.
+* `gunicorn` is a real install dependency, not something we install separately on the server.
+* `logging-extras` is a small library that gives us a `QueueListenerHandler` and a YAML loader for the standard logging config. (Side note: this is a pip package I maintain. We will wire it up a few sections down.)
+* `importlib-metadata` is only pulled in on Python < 3.8. Servers on 3.8+ won't even install it.
+* Dev and test dependencies move to `extras_require`. Install everything for local work with `pip install -e .[dev,test]`; `tox` installs just the `test` extra on its own.
+
+With the dependencies declared here, `setup.py` is otherwise the same file from part 1; `install_requires` simply falls away, leaving project metadata, `use_scm_version`, the package-discovery rule, and the console-script entry point:
+
+**[`setup.py`](https://github.com/zobayer1/flask-restful-boilerplate/blob/part-2/setup.py):**
 
 ```python
 # -*- coding: utf-8 -*-
@@ -37,10 +71,10 @@ setup(
     url="https://github.com/zobayer1/flask-restful-boilerplate",
     author="Zobayer Hasan",
     author_email="zobayer1@gmail.com",
-    description="A RESTful application server template with Python Flask-RESTful.",
+    description="A RESTful application server template built with Python and Flask.",
     keywords="python flask restful api server development template boilerplate",
     license="MIT",
-    packages=find_packages(exclude=["docs", "tests"]),
+    packages=find_packages(exclude=["docs", "tests", "tests.*"]),
     use_scm_version=True,
     platforms=["posix"],
     entry_points={
@@ -51,56 +85,11 @@ setup(
 )
 ```
 
-Much shorter, isn't it? `classifiers` and `install_requires` are no longer here. The CLI entry point still points to `myapi.manage:cli`, so `myapi --help` will keep working.
+The CLI entry point still points to `myapi.manage:cli`, so `myapi --help` keeps working.
 
-After renaming, the package now installs as `myapi` (matching the Python package directory), and the Github URL points to the new repository.
+With test dependencies declared in `setup.cfg`, `tox` can install our project with its test extras directly, with no separate dependency file to maintain.
 
-## **Pinning dependencies in `setup.cfg`**
-
-In part 1, we kept `install_requires` inside `setup.py`. That works, but `setup.cfg` is a friendlier place for it — declarative, version-pinned, and it lets us split test/dev dependencies into `extras_require`.
-
-**[`setup.cfg`](https://github.com/zobayer1/flask-restful-boilerplate/blob/845f3c60b8dbe0d10bf22aa8db6bed58f26ac330/setup.cfg):**
-
-```conf
-[metadata]
-license_files = LICENSE
-
-[options]
-setup_requires =
-    wheel==0.36.2
-    setuptools-scm==6.0.1
-
-install_requires =
-    flask-apispec==0.11.0
-    Flask-Cors==3.0.10
-    Flask-RESTful==0.3.9
-    gunicorn==20.1.0
-    importlib-metadata;python_version<"3.8"
-    logging-extras==0.2.0b0
-
-[options.extras_require]
-dev =
-    pre-commit>=2.13.0
-    python-dotenv>=0.17.1
-
-test =
-    flake8>=3.9.2
-    pytest>=6.2.4
-    pytest-cov>=2.12.1
-    tox>=3.23.1
-```
-
-A few things worth noting:
-
-* `flask-apispec` is new — we will use it for Swagger documentation later in this part.
-* `gunicorn` is now a real install dependency, not something we install separately on the server.
-* `logging-extras` is a small library that gives us a `QueueListenerHandler` and a YAML loader for the standard logging config. (Side note — this is a pip package I maintain. We will use it in a few sections.)
-* The Python 3.7 fallback for `importlib-metadata` is conditional on the running Python version. Most production servers running Python 3.8+ will not even install it.
-* Test dependencies move to `extras_require[test]`. To install them, run `pip install -e .[test]`. We will update `tox.ini` to do this automatically.
-
-Now we don't need to keep a manually generated `requirements.txt` around anymore — `tox` can install our project with its test extras directly.
-
-**[`tox.ini`](https://github.com/zobayer1/flask-restful-boilerplate/blob/845f3c60b8dbe0d10bf22aa8db6bed58f26ac330/tox.ini):**
+**[`tox.ini`](https://github.com/zobayer1/flask-restful-boilerplate/blob/part-2/tox.ini):**
 
 ```ini
 [testenv]
@@ -111,100 +100,46 @@ commands =
     py.test --cov myapi {posargs} --cov-report term-missing
 ```
 
-The `deps = -rrequirements.txt` line from part 1 is gone — we resolve dependencies straight from `setup.cfg` now.
+The inline `deps` list from part 1 is gone; we resolve dependencies straight from `setup.cfg` now.
 
 ## **Reorganizing the package**
 
-The single-file approach from part 1 works, but as the project grows, we want a layout that makes future additions obvious. Let's introduce four new subpackages under `myapi/`:
+Part 1 already nudged us toward structure: the health endpoint lives under `myapi/endpoints/v1/`, not in a flat module. Part 2 builds that out into a layout where future additions have an obvious home. The target structure:
 
 ```bash
 myapi
-├── apis           # blueprints, grouped by audience (local/apiv1/admin)
-├── commons        # shared utilities, enums, errors
-├── extensions     # Flask extension wrappers (apispec, etc.)
-└── internals      # models, schemas, services (the domain layer)
+├── app.py
+├── config.py
+├── manage.py
+├── wsgi.py
+├── commons          # shared, cross-cutting code
+│   ├── enums
+│   ├── errors
+│   └── helpers
+├── endpoints        # HTTP entry points, grouped by audience
+│   ├── admin        # internal tooling (empty for now)
+│   ├── local        # load-balancer / monitoring routes (empty for now)
+│   └── v1           # versioned public API, holds the health check from part 1
+├── extensions       # Flask extension wrappers (empty for now)
+├── models           # domain models (empty for now)
+└── services         # business logic (empty for now)
 ```
 
-Each subpackage gets its own `__init__.py`. The idea is:
+Every directory gets an `__init__.py` so it's a real package. The idea behind each:
 
-* **`apis/`** — every HTTP entry point lives here, grouped by whether it is local-only (server status, debug routes), versioned public API (`v1`), or admin (internal tools). Each group is a Flask blueprint.
-* **`commons/`** — anything cross-cutting: enums, errors, utility helpers. Things that any other layer can import without pulling in cycles.
-* **`extensions/`** — small wrapper classes for Flask extensions, exposed as importable singletons. We will write one for `flask-apispec` later in this part.
-* **`internals/`** — domain models, marshmallow schemas, services. We are not adding code here yet, but we are creating the empty subpackages now so the structure is in place.
+* **`endpoints/`** holds every HTTP entry point, grouped by who is meant to reach it: `local` for routes only internal callers hit (load balancers, monitoring agents), `v1` for the versioned public API, `admin` for internal tooling. Part 1's health check already lives under `v1`.
+* **`commons/`** is cross-cutting code any layer can import without creating cycles: shared `helpers`, `enums`, and `errors`.
+* **`models/`** holds the domain models, the data structures the app is actually about. Empty for now; we start filling it in part 3.
+* **`services/`** is the business logic that operates on those models, kept out of the HTTP layer so it stays testable on its own. Empty for now too.
+* **`extensions/`** are thin wrappers around Flask extensions, exposed as importable singletons.
 
-Most of these `__init__.py` files just have the encoding header for now. The interesting bits are coming in the next few sections.
+Most of these `__init__.py` files hold nothing but the encoding header for now; we are laying down the skeleton so later parts just drop files into the right place. The one directory with real code in this part is `commons/helpers`.
 
-## **Moving the health endpoint**
+## **The `commons/helpers` package**
 
-In part 1, we put our health-check at `/myapi/health/status`, with code under `myapi/health/`. Now that `myapi/apis/local/` exists, that's the better home for it. Local-only routes (only meant to be reached by load balancers, internal tooling, monitoring agents) belong here. The URL changes from `/myapi/health/status` to `/myapi/local/server/status`.
+Part 1's health endpoint looked up the running version with `from importlib.metadata import version`, inlined right in the module. Now that we have a `commons/` layer, that belongs in a shared helper: it's the kind of utility more than one module will want, and it lets us paper over the Python 3.7 fallback once, in one place:
 
-Delete the old `myapi/health/` directory and create the new location:
-
-**[`myapi/apis/local/server_status.py`](https://github.com/zobayer1/flask-restful-boilerplate/blob/845f3c60b8dbe0d10bf22aa8db6bed58f26ac330/myapi/apis/local/server_status.py):**
-
-```python
-# -*- coding: utf-8 -*-
-from flask import current_app as app
-from flask_apispec import MethodResource, doc
-
-from myapi.commons.utils.app_utils import app_version
-
-
-class ServerStatus(MethodResource):
-    @doc(tags=["local"], description="Get server health status")
-    def get(self):
-        app.logger.info("Health status request received")
-        return {"server": f"{app.name} v{app_version(app.name)}", "status": "running"}, 200
-```
-
-Three things to notice:
-
-1. We extend `flask_apispec.MethodResource` instead of `flask_restful.Resource`. This still gives us a REST-style class, but it also lets us decorate the methods with `@doc(...)` for Swagger.
-2. We log an info-level message every time the endpoint is hit. We will see this show up in our log file once logging is wired in.
-3. `app_version` is a small helper we will write next, in `commons/utils/`.
-
-**[`myapi/apis/local/__init__.py`](https://github.com/zobayer1/flask-restful-boilerplate/blob/845f3c60b8dbe0d10bf22aa8db6bed58f26ac330/myapi/apis/local/__init__.py):**
-
-```python
-# -*- coding: utf-8 -*-
-from flask import Blueprint
-from flask_restful import Api
-
-from myapi.apis.local.server_status import ServerStatus
-
-blueprint = Blueprint("local", __name__)
-
-api = Api(blueprint)
-api.add_resource(ServerStatus, "/server/status")
-
-__all__ = ["blueprint", "ServerStatus"]
-```
-
-We export both the `blueprint` (for registration) and the `ServerStatus` class (so the apispec extension can pull it in for documentation later).
-
-The `admin` and `apiv1` packages get a similar skeleton, but with no resources yet. Here's `apiv1` — `admin` is identical with a different blueprint name:
-
-**[`myapi/apis/apiv1/__init__.py`](https://github.com/zobayer1/flask-restful-boilerplate/blob/845f3c60b8dbe0d10bf22aa8db6bed58f26ac330/myapi/apis/apiv1/__init__.py):**
-
-```python
-# -*- coding: utf-8 -*-
-from flask import Blueprint
-from flask_restful import Api
-
-blueprint = Blueprint("apiv1", __name__)
-
-api = Api(blueprint)
-
-__all__ = ["blueprint"]
-```
-
-We are setting the scaffolding for future endpoints. As soon as we add a resource to `apiv1`, we just import it here and call `api.add_resource(...)`.
-
-## **The `commons/utils` helper**
-
-Earlier, `myapi/apis/local/server_status.py` imported an `app_version` helper from `myapi.commons.utils.app_utils`. Let's add it — it's a tiny shim around `importlib.metadata.version` that gracefully handles Python 3.7:
-
-**[`myapi/commons/utils/app_utils.py`](https://github.com/zobayer1/flask-restful-boilerplate/blob/845f3c60b8dbe0d10bf22aa8db6bed58f26ac330/myapi/commons/utils/app_utils.py):**
+**[`myapi/commons/helpers/metadata.py`](https://github.com/zobayer1/flask-restful-boilerplate/blob/part-2/myapi/commons/helpers/metadata.py):**
 
 ```python
 # -*- coding: utf-8 -*-
@@ -220,20 +155,43 @@ def app_version(name: str) -> str:
     return version(name)
 ```
 
-The `commons/enums/` and `commons/errors/` directories are still empty at this point — just placeholder `__init__.py` files. We will populate them in future parts when we add real models and error handlers.
+The only change to the health endpoint is to use it. Everything else about the route (the blueprint, the URL, the response) stays exactly as it was in part 1:
 
-## **A YAML-based logging configuration**
+**[`myapi/endpoints/v1/health.py`](https://github.com/zobayer1/flask-restful-boilerplate/blob/part-2/myapi/endpoints/v1/health.py):**
+
+```python
+# -*- coding: utf-8 -*-
+from flask import Blueprint
+from flask import current_app as app
+
+from myapi.commons.helpers.metadata import app_version
+
+health_blueprint = Blueprint("health", __name__)
+
+
+@health_blueprint.route("/status", methods=["GET"])
+def status():
+    return {"server": f"{app.name} v{app_version(app.name)}", "status": "running"}, 200
+```
+
+The URL is unchanged: `/myapi/v1/health/status`. The `commons/enums/` and `commons/errors/` packages stay empty for now; we populate them in later parts when real models and error handlers arrive.
+
+## **Logging**
+
+Good logging is the difference between a five-minute production diagnosis and a five-hour one. We set it up in a few steps: a YAML-driven configuration, wiring it into the app factory so it's ready before anything logs, a non-blocking queue listener so slow handlers don't stall requests, and finally a quick look at it working.
+
+### **A YAML-based logging configuration**
 
 The Python standard library has excellent logging support, but its programmatic configuration is verbose. Python's `logging.config` module can also load configuration from a dictionary or a file, which is much cleaner. We are going to drive logging from a YAML file under `instance/`, so every environment can ship its own config.
 
 We will use `logging-extras` for two things:
 
-1. A `YAMLConfig.from_file` helper that loads our YAML, expands environment variable placeholders, and calls `logging.config.dictConfig` for us.
+1. A `YAMLConfig.from_file` helper that loads our YAML, expands environment-variable placeholders, and calls `logging.config.dictConfig` for us.
 2. A `QueueListenerHandler` that lets slow handlers (file, SMTP) run on a background thread without blocking request handlers.
 
-Add `logging-extras==0.2.0b0` to `install_requires` in `setup.cfg` (we already did this above) and create our logging config:
+We already added `logging-extras==0.4.0b0` to `install_requires` above. Now create the logging config. Just like the `application.cfg` files from part 1, this lives under `instance/`, which we keep out of git entirely, so it never ships in the repo, and you create it yourself:
 
-**[`instance/testing/logging.yaml`](https://github.com/zobayer1/flask-restful-boilerplate/blob/845f3c60b8dbe0d10bf22aa8db6bed58f26ac330/instance/testing/logging.yaml):**
+**`instance/testing/logging.yaml`:**
 
 ```yaml
 # Logger configuration
@@ -298,20 +256,22 @@ root:
 
 Let's walk through the interesting bits:
 
-* **`objects:`** — this is a `logging-extras` extension. We declare a `queue.Queue` once here, and reference it as `cfg://objects.queue` later. The standard library does not let you declare arbitrary objects in `dictConfig`, but our YAML loader does.
-* **Three formatters** — `simple` for stderr (compact), `extended` for the file (includes module + line number), `email` for SMTP alerts.
-* **`${LOGGING_ROOT:.}`** — environment variable expansion. If `LOGGING_ROOT` is set, the log file goes there; otherwise it goes to `.` (the current working directory). This is how we tell development, testing, and production where to write logs without changing the YAML file.
-* **`file_handler`** is a plain `logging.FileHandler` — not a `RotatingFileHandler`. We will rotate logs externally with `logrotate`. More on that shortly.
-* **`mail_handler`** sends `CRITICAL` log records as emails. The Mailtrap credentials above are just placeholders — change them in your own deployment.
-* **`queue_handler`** — this is the non-blocking one. We will explain it in the next section.
-* **`loggers.myapi`** — our application logger. It uses both `console` (immediate stderr output) and `queue_handler` (which fans out to the file and email handlers on a background thread). `propagate: no` stops messages from bubbling up to the root logger and getting duplicated.
-* **`root`** — a fallback for messages that don't match any named logger. Catches output from third-party libraries.
+* **`objects:`** is a `logging-extras` extension. We declare a `queue.Queue` once here, and reference it as `cfg://objects.queue` later. The standard library does not let you declare arbitrary objects in `dictConfig`, but our YAML loader does.
+* **Three formatters**: `simple` for stderr (compact), `extended` for the file (includes module + line number), and `email` for SMTP alerts.
+* **`${LOGGING_ROOT:.}`** is environment-variable expansion. If `LOGGING_ROOT` is set, the log file goes there; otherwise it goes to `.` (the current working directory). This is how we tell development, testing, and production where to write logs without changing the YAML file.
+* **`file_handler`** is a plain `logging.FileHandler`, not a `RotatingFileHandler`; rotating and pruning log files is left to the deployment environment (more on that below).
+* **`mail_handler`** sends `CRITICAL` log records as emails. The Mailtrap credentials above are just placeholders; change them in your own deployment.
+* **`queue_handler`** is the non-blocking one. We will explain it in the next section.
+* **`loggers.myapi`** is our application logger. It uses both `console` (immediate stderr output) and `queue_handler` (which fans out to the file and email handlers on a background thread). `propagate: no` stops messages from bubbling up to the root logger and getting duplicated.
+* **`root`** is a fallback for messages that don't match any named logger. It catches output from third-party libraries.
 
-Notice the application logger is `myapi`, not `flask.app` or similar. That matches the package name, which means `import logging; logging.getLogger(__name__)` inside any `myapi.*` module will inherit the right configuration automatically.
+Notice the application logger is `myapi`, not `flask.app` or similar. That matches the package name, which means `import logging; logging.getLogger(__name__)` inside any `myapi.*` module inherits the right configuration automatically.
+
+We put this one under `testing/` because the test suite needs a known config to run against, so `instance/testing/logging.yaml` is the file to create first. Every other environment gets its own copy under `instance/<env>/logging.yaml`: `instance/development/logging.yaml`, `instance/production/logging.yaml`, and so on. Because the whole `instance/` directory stays out of version control (exactly as in part 1), none of these are committed; each deployment supplies its own, and real secrets and per-host settings never land in git.
 
 We also need to tell Flask where the logging config lives:
 
-**[`myapi/config.py`](https://github.com/zobayer1/flask-restful-boilerplate/blob/845f3c60b8dbe0d10bf22aa8db6bed58f26ac330/myapi/config.py):**
+**[`myapi/config.py`](https://github.com/zobayer1/flask-restful-boilerplate/blob/part-2/myapi/config.py):**
 
 ```python
 # -*- coding: utf-8 -*-
@@ -337,30 +297,18 @@ except AttributeError:  # pragma: no cover
 Logger extension will read configurations from the specified file.
 """
 LOGGING_CONFIG = os.getenv("LOGGING_CONFIG", f"instance/{ENV}/logging.yaml")
-
-"""APISPEC_SWAGGER_URL: URL for swagger.json file.
-
-Set None to disable serving this resource.
-"""
-APISPEC_SWAGGER_URL = "/myapi/apispec/spec"
-
-"""APISPEC_SWAGGER_UI_URL: URL for swagger-ui.
-
-Set None to disable serving this view.
-"""
-APISPEC_SWAGGER_UI_URL = "/myapi/apispec"
 ```
 
-Notice two changes from part 1's `config.py`:
+Two changes from part 1's `config.py`:
 
-* `SECRET_KEY` no longer has a default. If `$FLASK_SECRET` isn't set, the app refuses to start. We do not want a real secret key to be checked into version control as a fallback.
-* We've added a few new keys for logging (`LOGGING_CONFIG`) and swagger (`APISPEC_*`). We are also being a bit more diligent with docstrings.
+* `SECRET_KEY` no longer has a hard-coded fallback. If `$FLASK_SECRET` isn't set, the app refuses to start; we never want a real secret key living in version control as a default.
+* We add `LOGGING_CONFIG`, pointing at `instance/<env>/logging.yaml` by default, and give every setting a docstring while we're here.
 
-## **Wiring logging into the factory**
+### **Wiring logging into the factory**
 
-The critical thing about initializing logging is **timing**. We need it set up before any other module starts logging — including Flask's own startup. So our `create_app` function calls our logging setup as its very first step, before `Flask(...)` is constructed:
+The critical thing about initializing logging is **timing**. We need it set up before any other module starts logging, including Flask's own startup. So our `create_app` function calls our logging setup as its very first step, before `Flask(...)` is constructed:
 
-**[`myapi/app.py`](https://github.com/zobayer1/flask-restful-boilerplate/blob/845f3c60b8dbe0d10bf22aa8db6bed58f26ac330/myapi/app.py):**
+**[`myapi/app.py`](https://github.com/zobayer1/flask-restful-boilerplate/blob/part-2/myapi/app.py):**
 
 ```python
 # -*- coding: utf-8 -*-
@@ -370,15 +318,13 @@ from flask import Flask
 from flask_cors import CORS
 from logging_.config import YAMLConfig
 
-from myapi.apis import admin, apiv1, local
-from myapi.extensions import apispec
+from myapi.endpoints.v1.health import health_blueprint
 
 
-def create_app(app_name: str, instance_name: str = None, instance_path: str = None):
+def create_app(instance_name: str, app_name: str = "myapi"):
     """Creates a Flask app"""
-    instance_name = instance_name or os.getenv("FLASK_ENV", "development")
-    instance_path = instance_path or os.path.join(os.getcwd(), "instance")
-    _initialize_logging(f"{instance_name}/logging.yaml", instance_path, silent=True)
+    instance_path = os.path.join(os.getcwd(), "instance")
+    initialize_logging(f"{instance_name}/logging.yaml", instance_path, silent=True)
     app = Flask(
         app_name,
         instance_path=instance_path,
@@ -388,61 +334,39 @@ def create_app(app_name: str, instance_name: str = None, instance_path: str = No
     )
     app.config.from_object("myapi.config")
     app.config.from_pyfile(f"{instance_name}/application.cfg", silent=True)
-    if app.debug or app.testing:
-        _register_apispec(app)
-    _register_extensions(app)
-    _register_blueprints(app)
+    initialize_extensions(app)
+    initialize_blueprints(app)
     return app
 
 
-def _initialize_logging(filename: str, instance_path: str, **kwargs: bool):
+def initialize_logging(filename: str, instance_path: str, **kwargs: bool):
     """Initializes logging, must be done before creating Flask app"""
     YAMLConfig.from_file(os.path.join(instance_path, filename), **kwargs)
 
 
-def _register_extensions(app: Flask):
+def initialize_extensions(app: Flask):
     """Initializes extensions with app config"""
     CORS(app)
 
 
-def _register_blueprints(app: Flask):
+def initialize_blueprints(app: Flask):
     """Initializes blueprints with URL prefixes"""
-    app.register_blueprint(admin.blueprint, url_prefix="/myapi/admin")
-    app.register_blueprint(local.blueprint, url_prefix="/myapi/local")
-    app.register_blueprint(apiv1.blueprint, url_prefix="/myapi/v1")
-
-
-def _register_apispec(app: Flask):
-    """Initializes apispec plugin and registers resources for swagger"""
-    apispec.init_app(app)
-    apispec.register(local.ServerStatus, blueprint=local.blueprint)
+    app.register_blueprint(health_blueprint, url_prefix="/myapi/v1/health")
 ```
 
 Compared to part 1, the factory has grown but the structure is still clear:
 
-* The function signature now takes `app_name` explicitly, plus optional overrides for `instance_name` and `instance_path` (handy for tests).
-* We use **type hints** on parameters and return values throughout the file. This makes it easier for IDEs and tools like `mypy` to catch bugs.
-* `_initialize_logging` runs first. By the time `Flask(...)` is called, every logger in the application — including `flask.app`, which is what `app.logger` resolves to under the hood — already has its handlers attached.
-* `silent=True` means a missing logging config doesn't crash the app; it just falls back to the root logger.
-* Swagger UI (apispec) only gets registered in `debug` or `testing` mode — we don't want to expose it in production. This is a sane default, you can change it if you want.
-* All three blueprints (`admin`, `apiv1`, `local`) are registered up front, even though `admin` and `apiv1` are empty. Better to wire it once.
+* The signature is unchanged from part 1: it takes the `instance_name` and an optional `app_name` (defaulting to `"myapi"`). Callers like `wsgi.py` still pass the environment in, so nothing downstream has to change.
+* We add **type hints** on parameters throughout the file. This makes it easier for IDEs and tools like `mypy` to catch bugs.
+* `initialize_logging` runs first. By the time `Flask(...)` is called, and by the time `app.logger` exists, the `myapi` logger already has its handlers attached.
+* `silent=True` means a missing logging config doesn't crash the app; it just falls back to the root logger. (This is why running in `development` without an `instance/development/logging.yaml` simply logs nothing extra instead of erroring.)
+* We serve static files under `/myapi/static` and register the health blueprint at `/myapi/v1/health`. As `local`, `admin`, and future `v1` resources grow, they get registered here too.
 
-And the matching change in `wsgi.py`:
+Because the signature didn't change, `wsgi.py` carries over from part 1 untouched; it still calls `create_app(os.getenv("FLASK_ENV", "development"))`.
 
-**[`myapi/wsgi.py`](https://github.com/zobayer1/flask-restful-boilerplate/blob/845f3c60b8dbe0d10bf22aa8db6bed58f26ac330/myapi/wsgi.py):**
+### **Non-blocking logging with `QueueListenerHandler`**
 
-```python
-# -*- coding: utf-8 -*-
-from myapi.app import create_app
-
-app = create_app("myapi")
-```
-
-We no longer pass `FLASK_ENV` explicitly — `create_app` reads it from the environment itself (with a default of `development`).
-
-## **Non-blocking logging with `QueueListenerHandler`**
-
-A common rookie mistake with Python logging is to attach a slow handler — say, an `SMTPHandler` — directly to a hot logger. Every time you log a `CRITICAL` message, your request thread blocks on a TCP connection to the SMTP server. Under load, that means your endpoint latency tracks the worst-case SMTP latency.
+A common mistake with Python logging is to attach a slow handler (say, an `SMTPHandler`) directly to a hot logger. Every time you log a `CRITICAL` message, your request thread blocks on a TCP connection to the SMTP server. Under load, that means your endpoint latency tracks the worst-case SMTP latency.
 
 The standard library ships `logging.handlers.QueueHandler` and `QueueListener` to solve exactly this problem, but `dictConfig` does not make them easy to compose. `logging-extras` provides a `QueueListenerHandler` that combines both, so all you have to do in your YAML config is point it at a queue and a list of handlers:
 
@@ -459,118 +383,59 @@ Now, when our application logs a message:
 
 1. The log record gets dropped onto the queue (a very fast, non-blocking enqueue).
 2. A background thread (the `QueueListener`) pulls records off the queue and dispatches them to `file_handler` and `mail_handler`.
-3. The request thread continues immediately — it doesn't care how long the file write or the SMTP round-trip takes.
+3. The request thread continues immediately; it doesn't care how long the file write or the SMTP round-trip takes.
 
 The console handler stays attached directly to the `myapi` logger so we still get immediate, synchronous stderr output during development. Slow handlers go behind the queue. Best of both worlds.
 
-## **Rotating logs with `logrotate`**
+One thing we deliberately leave out is log **rotation**. Our app simply writes to `myapi.log`; rotating, compressing, and pruning those files is not the application's job. In most deployments that concern is handled outside the app, by the system (`logrotate`, `journald`) or by the container runtime and its logging driver. Keeping it out of the app also sidesteps the multi-process pitfalls of Python's `RotatingFileHandler` under `gunicorn -w 4`.
 
-If our application keeps writing to `myapi.log` forever, that file gets huge and we never get to compress or archive yesterday's logs. We need rotation.
+### **Seeing logging in action**
 
-Python's `logging.handlers` has rotating file handlers (`RotatingFileHandler`, `TimedRotatingFileHandler`), but they have a well-known caveat — they don't play nicely with multi-process workers like `gunicorn -w 4`. If four worker processes all try to rotate the same file at midnight, you end up with race conditions, lost log lines, or workers writing to the wrong file descriptor.
-
-Linux already ships a robust solution for this: the `logrotate` daemon. It runs once a day via cron, handles rotation outside our application, and takes care of compression and retention. Our app just keeps writing to one file (`myapi.log`); `logrotate` does everything else.
-
-On your server, create `/etc/logrotate.d/myapi`:
-
-```conf
-/var/log/myapi/myapi.log {
-    daily
-    rotate 14
-    compress
-    delaycompress
-    missingok
-    notifempty
-    copytruncate
-    create 0640 myapi myapi
-}
-```
-
-Let's go through the directives:
-
-* **`daily`** — rotate once a day. You can use `weekly`, `monthly`, or a size-based trigger like `size 100M` instead.
-* **`rotate 14`** — keep 14 old logs around. Anything older is deleted.
-* **`compress`** + **`delaycompress`** — gzip rotated logs, but skip the most recent one so it doesn't get compressed before our app finishes writing.
-* **`missingok`** + **`notifempty`** — don't fail if the log file is absent, and skip rotation if it's empty.
-* **`copytruncate`** — copy the current file to the rotated name, then truncate the original in place. This is the trick that makes rotation work without telling our app to reopen its file handle. The alternative is `create` plus a `postrotate` block that sends `SIGUSR1` to the app, but `copytruncate` is simpler and good enough for most setups.
-* **`create 0640 myapi myapi`** — only used if we drop `copytruncate`; sets permissions on the freshly created file.
-
-Set `LOGGING_ROOT=/var/log/myapi` in your production environment, make sure the `myapi` user owns that directory, and you are good. Force a test rotation with:
+Nothing in the app logs to the `myapi` logger yet (the health check is a plain status route), so let's watch a record flow through the whole chain. We wrote `instance/testing/logging.yaml` above for the tests; the development server needs its own config too, so give it one; copying the testing file is the quickest start:
 
 ```bash
-sudo logrotate -f /etc/logrotate.d/myapi
+cp instance/testing/logging.yaml instance/development/logging.yaml
 ```
 
-After the first rotation, you should see `myapi.log.1` (or `myapi.log.1.gz` after the next round) appear alongside the live `myapi.log`.
-
-One small caveat — `copytruncate` is not atomic. There's a very small window where log records written during the copy can be lost. For most applications this is fine; for an audit log where every record matters, prefer the `create` + `postrotate kill -USR1` route and teach your handler to reopen the file on signal.
-
-## **The apispec extension**
-
-We hinted earlier that we register an `apispec` extension in `create_app`. Let's actually write it. The goal is to wrap `flask-apispec` so the rest of the app can use it as a singleton via `from myapi.extensions import apispec`.
-
-**[`myapi/extensions/apispece_ext.py`](https://github.com/zobayer1/flask-restful-boilerplate/blob/845f3c60b8dbe0d10bf22aa8db6bed58f26ac330/myapi/extensions/apispece_ext.py):**
+Then drop a temporary line into the health handler:
 
 ```python
-# -*- coding: utf-8 -*-
-from typing import Type
-
-from apispec import APISpec
-from apispec.ext.marshmallow import MarshmallowPlugin
-from flask import Flask, Blueprint
-from flask_apispec import FlaskApiSpec
-from flask_restful import Resource
-
-from myapi.commons.utils.app_utils import app_version
-
-
-class ApiSpecExt(object):
-    def __init__(self, app: Flask = None):
-        self.apispec = FlaskApiSpec()
-        if app:  # pragma: no cover
-            self.init_app(app)
-
-    def init_app(self, app: Flask):
-        app.config.update(
-            {
-                "APISPEC_SPEC": APISpec(
-                    title=app.name,
-                    version=app_version(app.name),
-                    openapi_version="3.0.2",
-                    plugins=[MarshmallowPlugin()],
-                )
-            }
-        )
-        self.apispec.init_app(app)
-
-    def register(self, resource: Type[Resource], blueprint: Blueprint):
-        blueprint.before_app_first_request(lambda: self.apispec.register(resource, blueprint=blueprint.name))
+@health_blueprint.route("/status", methods=["GET"])
+def status():
+    app.logger.info("health status requested")
+    return {"server": f"{app.name} v{app_version(app.name)}", "status": "running"}, 200
 ```
 
-A few notes:
+`current_app.logger` resolves to the `myapi` logger (Flask names it after the app), so this one line fans out to every handler we configured. Run the server with `LOGGING_ROOT` pointed somewhere and hit the endpoint:
 
-* The class follows the classic two-phase Flask extension pattern — `__init__` (no app), `init_app(app)` (configures the actual app). This way, we can declare `apispec = ApiSpecExt()` as a module-level singleton and bind it to a Flask app later.
-* `APISpec` is the actual OpenAPI 3.0.2 spec object. We point it at our `marshmallow` schemas (we'll write some in part 3) so request and response models show up in Swagger automatically.
-* `register(resource, blueprint)` defers the registration until the first request comes in, using `before_app_first_request`. This avoids ordering problems where we try to register a resource before its blueprint is attached.
-
-And the singleton in **[`myapi/extensions/__init__.py`](https://github.com/zobayer1/flask-restful-boilerplate/blob/845f3c60b8dbe0d10bf22aa8db6bed58f26ac330/myapi/extensions/__init__.py)**:
-
-```python
-# -*- coding: utf-8 -*-
-from myapi.extensions.apispece_ext import ApiSpecExt
-
-apispec = ApiSpecExt()
-
-__all__ = ["apispec"]
+```bash
+export LOGGING_ROOT=.
+flask run -h 0.0.0.0 -p 5000
+curl http://localhost:5000/myapi/v1/health/status
 ```
 
-We already added the wiring in `create_app` — in debug/testing mode, it calls `apispec.init_app(app)` and registers `ServerStatus` for documentation. When you visit `/myapi/apispec` in development, you'll get a fully interactive Swagger UI listing the local health endpoint.
+You'll see it on stderr immediately (the `console` handler, `simple` format):
+
+```text
+[2021-05-09 05:00:00.000] [pid 12345] [INFO]: health status requested
+```
+
+and a moment later in `myapi.log` (the `queue_handler` → `file_handler`, `extended` format, written on the background thread):
+
+```text
+[2021-05-09 05:00:00.000] [pid 12345] [INFO] - [health:12]: health status requested
+```
+
+We'll add real and meaningful logging in part 3 as the endpoints grow. The point here is the plumbing: one `app.logger` call reaches a fast console handler and a non-blocking file handler with zero per-call setup.
 
 ## **A small CLI command**
 
-It's handy to be able to ask the running app what environment variables it sees. Let's add a `myapi env` subcommand. The `manage.py` file gets a bit of a rewrite from part 1:
+Part 1 already set up the CLI: `manage.py` wires a `FlaskGroup` so `myapi run` and `myapi shell` work out of the box. Adding our own command is just a matter of decorating a function with `@cli.command()`. Let's create a new command `myapi env` that prints the current configuration.
 
-**[`myapi/manage.py`](https://github.com/zobayer1/flask-restful-boilerplate/blob/845f3c60b8dbe0d10bf22aa8db6bed58f26ac330/myapi/manage.py):**
+> **This is a learning aid, not a production feature.** A command that dumps secrets and running configuration is fine for experimenting on your own machine, but you should never ship one in a real app. Keep commands like this out of anything that runs in production.
+{: .prompt-warning }
+
+**[`myapi/manage.py`](https://github.com/zobayer1/flask-restful-boilerplate/blob/part-2/myapi/manage.py):**
 
 ```python
 # -*- coding: utf-8 -*-
@@ -582,7 +447,14 @@ from flask.cli import FlaskGroup
 from myapi.app import create_app
 
 
-cli = FlaskGroup(create_app=lambda: create_app("myapi"))
+def create_cli_app():
+    return create_app(os.getenv("FLASK_ENV", "development"))
+
+
+@click.group(cls=FlaskGroup, create_app=create_cli_app)
+def cli():
+    """Management interface for myapi"""
+    pass
 
 
 @cli.command()
@@ -591,40 +463,33 @@ def env():
     env_vars = ["FLASK_ENV", "FLASK_SECRET", "LOGGING_ROOT", "LOGGING_CONFIG"]
     for var in env_vars:
         click.echo(f"${var}={os.getenv(var)}")
+
+
+if __name__ == "__main__":
+    cli()
 ```
 
-Now `myapi env` prints every Flask-related environment variable our app cares about. This is the kind of small CLI command that pays for itself the first time you have to debug a production deployment.
+The output looks like this:
 
 ```bash
 $ myapi env
 $FLASK_ENV=development
 $FLASK_SECRET=bb9ba2817ef62e261d3adaf90c2727bb
-$LOGGING_ROOT=None
+$LOGGING_ROOT=.
 $LOGGING_CONFIG=None
 ```
 
-You can keep adding `@cli.command()` decorated functions for tasks like database migrations, seeding, periodic cleanup, etc.
+You can keep adding `@cli.command()` decorated functions for tasks like database migrations, seeding, periodic cleanup, and so on.
 
 ## **Updating the tests**
 
 Our tests have to keep up with the changes. Three things change here:
 
-1. The test app needs to set environment variables before calling `create_app`.
-2. The health-check test moves to `tests/test_apis/test_public/test_status.py`.
-3. We add a new CLI test for the `env` command.
+1. The test fixture pins the environment (`FLASK_ENV`, `FLASK_SECRET`, `LOGGING_ROOT`) before calling `create_app`, so the suite runs the same regardless of what's set in your shell.
+2. We add a new CLI test for the `env` command.
+3. The existing config test gets a tiny touch-up for the shared `app_version` helper.
 
-First, a small helper for environment variables in **[`tests/envvars.py`](https://github.com/zobayer1/flask-restful-boilerplate/blob/845f3c60b8dbe0d10bf22aa8db6bed58f26ac330/tests/envvars.py)**:
-
-```python
-# -*- coding: utf-8 -*-
-variables = {
-    "LOGGING_ROOT": ".",
-    "FLASK_SECRET": "bb9ba2817ef62e261d3adaf90c2727bb",
-    "FLASK_ENV": "testing",
-}
-```
-
-Then the updated **[`tests/conftest.py`](https://github.com/zobayer1/flask-restful-boilerplate/blob/845f3c60b8dbe0d10bf22aa8db6bed58f26ac330/tests/conftest.py)**:
+Start with the updated **[`tests/conftest.py`](https://github.com/zobayer1/flask-restful-boilerplate/blob/part-2/tests/conftest.py)**:
 
 ```python
 # -*- coding: utf-8 -*-
@@ -633,14 +498,19 @@ import os
 import pytest
 
 from myapi.app import create_app
-from tests.envvars import variables
 
 
 @pytest.fixture(scope="module")
 def app():
     """A flask app with testing configurations"""
-    os.environ.update(variables)
-    return create_app("myapi")
+    os.environ.update(
+        {
+            "FLASK_ENV": "testing",
+            "FLASK_SECRET": "bb9ba2817ef62e261d3adaf90c2727bb",
+            "LOGGING_ROOT": ".",
+        }
+    )
+    return create_app("testing")
 
 
 @pytest.fixture(scope="module")
@@ -655,11 +525,9 @@ def runner(app):
     return app.test_cli_runner()
 ```
 
-We set `FLASK_ENV=testing` and `LOGGING_ROOT=.` so the testing instance config and logging YAML are picked up, and the log file lives in the project root during tests (not somewhere unexpected).
+We pass `"testing"` to `create_app`, exactly as in part 1, so it loads `instance/testing/`. The `os.environ.update(...)` above is about **test isolation**: a unit or integration test should behave identically no matter what a developer happens to have exported, so we pin every variable the app reads rather than inheriting the ambient shell. `FLASK_SECRET` is the one the app strictly requires: part 2's `config.py` dropped the hard-coded fallback and refuses to start without it. `LOGGING_ROOT=.` keeps the test log file (`myapi.log`) in the project root instead of wherever an ambient `LOGGING_ROOT` might point. `FLASK_ENV=testing` is belt-and-suspenders: `create_app("testing")` and the testing instance config already force the environment, but pinning it makes the intent explicit and guards against future code that reads it. We also add a `runner` fixture (a `FlaskCliRunner`) for testing CLI commands.
 
-The health-check test moves to its new location. Delete `tests/test_health/` entirely and create a `tests/test_apis/test_public/` package with the new test:
-
-**[`tests/test_apis/test_public/test_status.py`](https://github.com/zobayer1/flask-restful-boilerplate/blob/845f3c60b8dbe0d10bf22aa8db6bed58f26ac330/tests/test_apis/test_public/test_status.py):**
+The health-check test carries over from part 1 unchanged; the endpoint didn't move, so **[`tests/test_health/test_status.py`](https://github.com/zobayer1/flask-restful-boilerplate/blob/part-2/tests/test_health/test_status.py)** still hits `/myapi/v1/health/status`:
 
 ```python
 # -*- coding: utf-8 -*-
@@ -667,15 +535,13 @@ import json
 
 
 def test_server_status_returns_success(client):
-    """Test fails if /myapi/local/server/status does not return success"""
-    response = client.get("/myapi/local/server/status")
+    """Test fails if /myapi/v1/health/status does not return success"""
+    response = client.get("/myapi/v1/health/status")
     assert response.status_code == 200
     assert json.loads(response.data).get("status") == "running"
 ```
 
-The only real difference from part 1's test is the URL — `/myapi/health/status` is now `/myapi/local/server/status`.
-
-And a new test for the CLI command, in **[`tests/test_cli.py`](https://github.com/zobayer1/flask-restful-boilerplate/blob/845f3c60b8dbe0d10bf22aa8db6bed58f26ac330/tests/test_cli.py)**:
+A new test for the CLI command goes in **[`tests/test_cli.py`](https://github.com/zobayer1/flask-restful-boilerplate/blob/part-2/tests/test_cli.py)**:
 
 ```python
 # -*- coding: utf-8 -*-
@@ -691,20 +557,20 @@ def test_command_env_exits_with_success(runner):
     assert result.exit_code == 0
 ```
 
-We use the `runner` fixture (a `FlaskCliRunner`) to invoke `myapi env` and check that all four environment variable names show up in the output.
+We use the `runner` fixture to invoke `myapi env` and check that all four environment variable names show up in the output.
 
-The existing `tests/test_config.py` gets a tiny touch-up — `app.name` is `myapi` now, and we use `app_version` from our utils:
+Finally, `tests/test_config.py` gets a tiny touch-up: it now imports `app_version` from our new `commons/helpers` package instead of calling `importlib.metadata` directly:
 
-**[`tests/test_config.py`](https://github.com/zobayer1/flask-restful-boilerplate/blob/845f3c60b8dbe0d10bf22aa8db6bed58f26ac330/tests/test_config.py):**
+**[`tests/test_config.py`](https://github.com/zobayer1/flask-restful-boilerplate/blob/part-2/tests/test_config.py):**
 
 ```python
 # -*- coding: utf-8 -*-
-from myapi.commons.utils.app_utils import app_version
+from myapi.commons.helpers.metadata import app_version
 
 
 def test_env(app):
     """Test fails if app was not initialized with testing configurations"""
-    assert app.env == "testing"
+    assert app.config["ENV"] == "testing"
     assert app.testing
 
 
@@ -728,29 +594,34 @@ If everything was wired correctly, the output should look something like this:
 ```bash
 collected 4 items
 
-tests/test_apis/test_public/test_status.py .                                       [ 25%]
-tests/test_cli.py .                                                                [ 50%]
-tests/test_config.py ..                                                            [100%]
+tests/test_cli.py .                                                      [ 25%]
+tests/test_config.py ..                                                  [ 75%]
+tests/test_health/test_status.py .                                       [100%]
 
----------- coverage: platform linux, python 3.8.x-final-0 ----------
-Name                                              Stmts   Miss  Cover
----------------------------------------------------------------------
-myapi/__init__.py                                     0      0   100%
-myapi/apis/__init__.py                                0      0   100%
-myapi/apis/admin/__init__.py                          5      0   100%
-myapi/apis/apiv1/__init__.py                          5      0   100%
-myapi/apis/local/__init__.py                          7      0   100%
-myapi/apis/local/server_status.py                     8      0   100%
-myapi/app.py                                         24      0   100%
-myapi/commons/utils/app_utils.py                      4      0   100%
-myapi/config.py                                       5      0   100%
-myapi/extensions/__init__.py                          2      0   100%
-myapi/extensions/apispece_ext.py                     14      0   100%
-myapi/manage.py                                       8      0   100%
----------------------------------------------------------------------
-TOTAL                                                82      0   100%
+---------- coverage: platform linux, python 3.8.11-final-0 -----------
+Name                                Stmts   Miss  Cover
+-------------------------------------------------------
+myapi/__init__.py                       0      0   100%
+myapi/app.py                           20      0   100%
+myapi/commons/__init__.py               0      0   100%
+myapi/commons/enums/__init__.py         0      0   100%
+myapi/commons/errors/__init__.py        0      0   100%
+myapi/commons/helpers/__init__.py       0      0   100%
+myapi/commons/helpers/metadata.py       3      0   100%
+myapi/config.py                         5      0   100%
+myapi/endpoints/__init__.py             0      0   100%
+myapi/endpoints/admin/__init__.py       0      0   100%
+myapi/endpoints/local/__init__.py       0      0   100%
+myapi/endpoints/v1/__init__.py          0      0   100%
+myapi/endpoints/v1/health.py            7      0   100%
+myapi/extensions/__init__.py            0      0   100%
+myapi/models/__init__.py                0      0   100%
+myapi/services/__init__.py              0      0   100%
+-------------------------------------------------------
+TOTAL                                  35      0   100%
 
-================================ 4 passed in 0.18s ================================
+
+============================== 4 passed in 0.17s ================================
 ```
 
 Now start the development server:
@@ -759,7 +630,7 @@ Now start the development server:
 flask run -h 0.0.0.0 -p 5000
 ```
 
-Navigate to [http://localhost:5000/myapi/local/server/status](http://localhost:5000/myapi/local/server/status). You should get:
+Navigate to [http://localhost:5000/myapi/v1/health/status](http://localhost:5000/myapi/v1/health/status). You should get:
 
 ```json
 {
@@ -768,29 +639,16 @@ Navigate to [http://localhost:5000/myapi/local/server/status](http://localhost:5
 }
 ```
 
-While you're at it, open [http://localhost:5000/myapi/apispec](http://localhost:5000/myapi/apispec) — Swagger UI should render, with the `ServerStatus` endpoint documented and a "Try it out" button.
-
-Finally, check the log file. There should now be a `myapi.log` in the project root (because `LOGGING_ROOT=.` for development), and every request to the health endpoint should produce a line like:
-
-```text
-[2021-05-09 05:00:00.000] [pid 12345] [INFO] - [server_status:11]: Health status request received
-```
-
-If you want to see log rotation in action without waiting until tomorrow, copy the `/etc/logrotate.d/myapi` config to your server, set `LOGGING_ROOT=/var/log/myapi`, and run `sudo logrotate -f /etc/logrotate.d/myapi`.
-
 ## **Wrapping up**
 
 This was a big part. To recap, we have:
 
-* Renamed the project and slimmed down `setup.py`.
-* Pinned dependencies in `setup.cfg` with `extras_require` for dev and test groups.
-* Reorganized the package into `apis/`, `commons/`, `extensions/`, and `internals/` subpackages.
-* Moved the health endpoint to `apis/local/` and updated its URL.
+* Pinned dependencies in `setup.cfg` with `extras_require` for dev and test groups, and trimmed `setup.py` to match.
+* Reorganized the package into `endpoints/`, `commons/`, `models/`, `services/`, and `extensions/` subpackages.
+* Added a shared `app_version` helper and pointed the health endpoint at it (its URL is unchanged).
 * Added a YAML-driven logging config with a non-blocking queue listener.
-* Set up `logrotate` for production log rotation.
-* Added Swagger UI through a custom `flask-apispec` extension.
-* Added a CLI `env` command and updated the test suite.
+* Added a CLI `env` command and grew the test suite.
 
-Tag this state as **v0.2.0**. Full source code for this part is available in [Github](https://github.com/zobayer1/flask-restful-boilerplate/tree/845f3c60b8dbe0d10bf22aa8db6bed58f26ac330). Clone the repository and checkout at tag `v0.2.0`.
+Commit this state and tag it as **v0.2.0**. With a tag in place, `python -m build` and `use_scm_version` will stamp the package as `0.2.0` rather than a development version. Full source code for this part is available on [GitHub](https://github.com/zobayer1/flask-restful-boilerplate/tree/part-2). Clone the repository and check out the `part-2` branch.
 
-In part 3, we will dig into the `internals/` package — models, marshmallow schemas, and services — and start building out a real `apiv1` resource with an error handler base class. Stay tuned!!!
+In part 3, we will start filling in the `models/` and `services/` layers and build out a real `v1` resource with an error-handler base class. Stay tuned!!!
