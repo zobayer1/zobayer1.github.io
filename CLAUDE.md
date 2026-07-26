@@ -6,12 +6,24 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 A personal Jekyll blog (`zobayer.net`) built on the **Chirpy** theme, derived from
 [chirpy-starter](https://github.com/cotes2020/chirpy-starter). The theme is consumed as a
-**RubyGem** (`jekyll-theme-chirpy ~> 7.5`, see `Gemfile`), so this repo holds *content and
-config only* — it does not contain the theme's `_layouts`, `_includes`, `_sass`, or
-`_javascript` source. To inspect theme internals, run `bundle info --path jekyll-theme-chirpy`.
+**RubyGem** (`jekyll-theme-chirpy ~> 7.5`, see `Gemfile`), so this repo holds mostly *content and
+config* — it does not vendor the theme's `_sass` or `_javascript` source. To inspect theme
+internals, run `bundle info --path jekyll-theme-chirpy`.
 
 This is a content repo, not theme development. Most of what you'll do is author Markdown
 posts/pages and adjust `_config.yml`.
+
+### Theme overrides
+
+A file in this repo's `_layouts/` or `_includes/` shadows the gem's file of the same path, so
+overrides are copies that drift from upstream and **must be re-checked after a theme bump**.
+Current overrides:
+
+- `_layouts/home.html` — copy of Chirpy 7.5.0's, plus three blocks marked `LOCAL:` that add a
+  GoatCounter view count to each post card's meta row. Diff against
+  `$(bundle info --path jekyll-theme-chirpy)/_layouts/home.html` after upgrading and re-apply.
+- `_includes/pageviews/goatcounter-list.html` — new file, no upstream counterpart. Fetches a
+  count per card. The theme's own `pageviews/goatcounter.html` handles post pages only.
 
 ## Common commands
 

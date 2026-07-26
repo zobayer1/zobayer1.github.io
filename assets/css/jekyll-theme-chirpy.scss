@@ -58,3 +58,12 @@
     margin-left: 340px;
   }
 }
+
+/* Pageviews eye icon on post cards (see _layouts/home.html).
+   Its box already lines up with the calendar/folder icons — identical top and
+   bottom — but the folder glyph is bottom-heavy while the eye is mass-centered,
+   so the eye reads as ~1px high next to it. Optical nudge only. */
+#post-list .card .card-body .post-meta .fa-eye {
+  position: relative;
+  top: 1px;
+}

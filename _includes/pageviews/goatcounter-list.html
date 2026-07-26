@@ -1,0 +1,46 @@
+<!--
+  Display GoatCounter pageviews on post-list cards.
+
+  Local addition (no upstream counterpart). The theme only ships
+  `_includes/pageviews/goatcounter.html`, which targets the single `#pageviews`
+  element on a post page; this handles the many cards on a list page.
+
+  Each card is hidden until its count arrives, so a slow or unavailable counter
+  degrades to the card simply not showing a view count — no spinners, no
+  misleading fallback number.
+-->
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const items = document.querySelectorAll('#post-list .pv-count[data-pv-path]');
+
+    if (items.length === 0) {
+      return;
+    }
+
+    const formatter = new Intl.NumberFormat();
+
+    items.forEach((item) => {
+      /* GoatCounter stores paths with the trailing slash trimmed. */
+      const uri = item.dataset.pvPath.replace(/\/$/, '');
+      const url = `https://{{ site.analytics.goatcounter.id }}.goatcounter.com/counter/${encodeURIComponent(uri)}.json`;
+
+      fetch(url)
+        .then((response) => (response.ok ? response.json() : Promise.reject(response.status)))
+        .then((data) => {
+          const count = data.count.replace(/\D/g, '');
+          item.innerText = formatter.format(count);
+          item.classList.remove('d-none');
+
+          /* The eye icon is a sibling, not a wrapper — see the note in _layouts/home.html. */
+          const icon = item.previousElementSibling;
+
+          if (icon) {
+            icon.classList.remove('d-none');
+          }
+        })
+        .catch(() => {
+          /* Leave the count hidden. */
+        });
+    });
+  });
+</script>
