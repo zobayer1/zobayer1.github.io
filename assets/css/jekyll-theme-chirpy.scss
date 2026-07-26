@@ -8,12 +8,18 @@
 {%- endif -%}
 ';
 
+/* Courier Prime, for the sidebar brand only — hence the single 700 weight.
+   Sass hoists a plain CSS @import to the very top of the compiled stylesheet,
+   which is what makes this legal (a trailing @import would be ignored) and is
+   why no `head.html` override is needed to add the font. */
+@import url("https://fonts.googleapis.com/css2?family=Courier+Prime:wght@700&display=swap");
+
 /* ===== Custom overrides ===== */
 
-/* Site title — bigger, bold, code-style (monospace) */
+/* Sidebar brand — bold typewriter. Courier New is the metric-alike fallback
+   for the swap period and for when the webfont fails to load. */
 #sidebar .site-title {
-  font-family: ui-monospace, "SFMono-Regular", "SF Mono", Menlo, Consolas,
-    "Liberation Mono", "Courier New", monospace;
+  font-family: "Courier Prime", "Courier New", Courier, monospace;
   font-size: 1.8rem;
   font-weight: 700;
   letter-spacing: 0;

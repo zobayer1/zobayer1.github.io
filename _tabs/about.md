@@ -4,6 +4,8 @@ icon: fas fa-info-circle
 order: 4
 ---
 
+![Zobayer Hasan](/commons/avatar.png){: .right .w-25 .rounded-circle }
+
 #### Hi! I’m Zobayer.
 
 Just a tech guy making a living in the world of software engineering.
