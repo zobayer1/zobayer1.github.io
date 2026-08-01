@@ -24,6 +24,17 @@ Current overrides:
   `$(bundle info --path jekyll-theme-chirpy)/_layouts/home.html` after upgrading and re-apply.
 - `_includes/pageviews/goatcounter-list.html` — new file, no upstream counterpart. Fetches a
   count per card. The theme's own `pageviews/goatcounter.html` handles post pages only.
+- `_includes/pageviews/goatcounter.html` — copy of Chirpy 7.5.0's, changing only `fetch(url)` to
+  `fetch(url, { cache: 'no-cache' })`. See the note on counter staleness below.
+
+Both pageview includes pass `cache: 'no-cache'`. GoatCounter serves `/counter/*.json` with
+`Cache-Control: public` and `Expires: +4h` from its own edge (`Vinyl-Cache`), so counts on the
+page lag reality by up to ~4h no matter what — that floor is theirs. Without `no-cache` the
+visitor's browser caches the already-stale body for 4 more hours on top, which can put a
+displayed count ~8h behind. Cache-busting query params do not defeat their edge (`?cb=` is
+ignored; `?start=` is honoured and keys separately), and deliberately busting it would just
+hammer a free service. Note also that the counter is **all-time**, while the GoatCounter
+dashboard defaults to a limited period — the two only agree with the dashboard set to All time.
 
 ## Common commands
 

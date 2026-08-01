@@ -1,0 +1,30 @@
+<!--
+  Local override of the theme's post-page pageviews include (copied from
+  jekyll-theme-chirpy 7.5.0). The only change from upstream is `cache: 'no-cache'`
+  on the fetch — see the comment below. Re-apply it after a theme bump.
+-->
+<!-- Display GoatCounter pageviews -->
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const pv = document.getElementById('pageviews');
+
+    if (pv !== null) {
+      const uri = location.pathname.replace(/\/$/, '');
+      const url = `https://{{ site.analytics.goatcounter.id }}.goatcounter.com/counter/${encodeURIComponent(uri)}.json`;
+
+      /* LOCAL: `no-cache` revalidates instead of reusing the browser's copy.
+         GoatCounter sends `Expires: +4h`, so a reload can otherwise pin an
+         already-stale body for 4 more hours. Their edge still absorbs the
+         request — the ~4h floor is theirs and can't be beaten from here. */
+      fetch(url, { cache: 'no-cache' })
+        .then((response) => response.json())
+        .then((data) => {
+          const count = data.count.replace(/\D/g, '');
+          pv.innerText = new Intl.NumberFormat().format(count);
+        })
+        .catch((error) => {
+          pv.innerText = '1';
+        });
+    }
+  });
+</script>

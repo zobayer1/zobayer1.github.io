@@ -24,7 +24,11 @@
       const uri = item.dataset.pvPath.replace(/\/$/, '');
       const url = `https://{{ site.analytics.goatcounter.id }}.goatcounter.com/counter/${encodeURIComponent(uri)}.json`;
 
-      fetch(url)
+      /* `no-cache` revalidates instead of reusing the browser's copy. GoatCounter
+         sends `Expires: +4h`, so a reload can otherwise pin an already-stale body
+         for 4 more hours. Their edge still absorbs the request — the ~4h floor is
+         theirs and can't be beaten from here. */
+      fetch(url, { cache: 'no-cache' })
         .then((response) => (response.ok ? response.json() : Promise.reject(response.status)))
         .then((data) => {
           const count = data.count.replace(/\D/g, '');
