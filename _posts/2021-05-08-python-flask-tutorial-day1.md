@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  RESTful Application Development with Python Flask, Part 1
+title:  "Python Flask from Zero, Part 1: Structure, Factory, Packaging"
 date:   2021-05-08 05:00:00 +0600
 categories: [Backend]
 tags: [Python, Flask, REST, API, Tutorial]

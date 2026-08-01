@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  RESTful Application Development with Python Flask, Part 2
+title:  "Python Flask from Zero, Part 2: Layers, Logging, and a CLI"
 date:   2021-05-09 05:00:00 +0600
 categories: [Backend]
 tags: [Python, Flask, REST, API, Tutorial]
