@@ -22,19 +22,69 @@ Current overrides:
 - `_layouts/home.html` — copy of Chirpy 7.5.0's, plus three blocks marked `LOCAL:` that add a
   GoatCounter view count to each post card's meta row. Diff against
   `$(bundle info --path jekyll-theme-chirpy)/_layouts/home.html` after upgrading and re-apply.
-- `_includes/pageviews/goatcounter-list.html` — new file, no upstream counterpart. Fetches a
-  count per card. The theme's own `pageviews/goatcounter.html` handles post pages only.
-- `_includes/pageviews/goatcounter.html` — copy of Chirpy 7.5.0's, changing only `fetch(url)` to
-  `fetch(url, { cache: 'no-cache' })`. See the note on counter staleness below.
+- `_includes/pageviews/goatcounter-list.html` — new file, no upstream counterpart. Fills in the
+  counts on post cards. The theme's own `pageviews/goatcounter.html` handles post pages only.
+- `_includes/pageviews/goatcounter.html` — copy of Chirpy 7.5.0's, changed to read from the
+  Worker, and to hide the line rather than print `1` on failure. Upstream's fallback is
+  indistinguishable from a genuine count of 1, which once disguised a GoatCounter outage here
+  as real data. Upstream's spinner is never shown either — see the CSS note below.
+- `_includes/pageviews/counts-store.html` — new file, no upstream counterpart. Shared by both
+  pageview includes: starts the request at parse time and keeps the last response in
+  localStorage for 60s.
+- `assets/js/data/swconf.js` — copy of Chirpy 7.5.0's, plus one `LOCAL:` block adding
+  `pageviews.proxy` to the service worker's `interceptor.urlPrefixes`. The service worker is
+  cache-first and ignores `Cache-Control`, so without this it stores the Worker's response on
+  first visit and replays it until the next deploy rotates `cacheName` — freezing every count.
 
-Both pageview includes pass `cache: 'no-cache'`. GoatCounter serves `/counter/*.json` with
-`Cache-Control: public` and `Expires: +4h` from its own edge (`Vinyl-Cache`), so counts on the
-page lag reality by up to ~4h no matter what — that floor is theirs. Without `no-cache` the
-visitor's browser caches the already-stale body for 4 more hours on top, which can put a
-displayed count ~8h behind. Cache-busting query params do not defeat their edge (`?cb=` is
-ignored; `?start=` is honoured and keys separately), and deliberately busting it would just
-hammer a free service. Note also that the counter is **all-time**, while the GoatCounter
-dashboard defaults to a limited period — the two only agree with the dashboard set to All time.
+## Page view counts
+
+Counts do **not** come from GoatCounter's public `/counter/*.json` endpoint. That endpoint is
+served with `Cache-Control: public` and `Expires: +4h` from GoatCounter's own edge, so it lags
+reality by up to ~4h. Its cache cannot be defeated from the client (`?cb=` is ignored; `?start=`
+is honoured but merely keys a separate 4h entry), and deliberately busting it would just hammer
+a free service.
+
+Instead, `worker/` holds a Cloudflare Worker that reads GoatCounter's authenticated API
+(`/api/v0/stats/hits`) and re-exposes every path's count as a single public JSON map. The site
+fetches it once per page load — one request for the whole home page, not one per card.
+`pageviews.proxy` in `_config.yml` is that URL; empty means no counts appear anywhere, as there
+is deliberately no fallback.
+
+- **Deploy:** pushing a change under `worker/` to `main` triggers
+  `.github/workflows/worker-deploy.yml`. `pages-deploy.yml` ignores `worker/**` so a
+  Worker-only change does not rebuild the site. Manually it is `cd worker && npx wrangler deploy`
+  (or `-c worker/wrangler.toml` from the root). CI needs two GitHub secrets,
+  `CLOUDFLARE_API_TOKEN` (the "Edit Cloudflare Workers" template) and `CLOUDFLARE_ACCOUNT_ID`.
+- **The GoatCounter API token is a Worker secret** — `npx wrangler secret put GOATCOUNTER_TOKEN` —
+  never in the repo and deliberately *not* in GitHub. Worker secrets live in Cloudflare and
+  survive redeploys, so CI never needs it. Local dev secrets belong in `worker/.dev.vars`, which
+  is gitignored.
+- **Freshness** is capped by `CACHE_TTL` (5 min) via the `PV_CACHE` KV namespace, which also
+  bounds GoatCounter to ~12 API calls/hour no matter how much traffic the site gets. KV is used
+  rather than the Cache API because the latter appears to be a no-op on `workers.dev` subdomains.
+  The Worker separately sends `max-age=BROWSER_TTL` (60s) so a visitor clicking around the site
+  paints counts from their own browser cache instead of refetching — a refetch per page load
+  means a spinner in the post meta and a spinning tab throbber every time. Worst case a visitor
+  sees `BROWSER_TTL + CACHE_TTL` of staleness. The includes therefore use a plain `fetch()`; do
+  not reintroduce `cache: 'no-cache'`, which defeats this entirely.
+- **No spinner on post pages.** Chirpy's markup seeds `#pageviews` with a spinner, but the
+  pageviews script is emitted into `<head>` — thousands of characters before the element is
+  parsed — so it cannot paint until `DOMContentLoaded`, and on a long post that spinner turns
+  for the whole parse. Two mitigations: `counts-store.html` starts the request at parse time
+  instead of on `DOMContentLoaded`, and caches the map in localStorage for 60s so a repeat visit
+  needs no network at all. The line itself is then hidden by
+  `.post-meta span:has(> #pageviews)` in `assets/css/jekyll-theme-chirpy.scss` and revealed with
+  `.pv-ready` once a real number exists, which also means a failed lookup degrades to nothing
+  rather than a spinner that turns forever.
+- **`START` (2023-01-01) bounds the query window and must stay bounded.** GoatCounter always
+  returns a per-day *and* per-hour series for every path in the range — `group` does not suppress
+  it — so an all-time window exceeds the Worker's 128MB memory limit while reading the body. Data
+  for this site begins in 2024 (measured: the site total is flat for every floor from 2018 through
+  2024-01-03, then falls). Hits before `START` are not counted, so bump it if older data is ever
+  imported.
+- `worker/` is in the Jekyll `exclude:` list so it is never published to the site.
+- The Worker reports **all-time** counts, while the GoatCounter dashboard defaults to a limited
+  period — the two only agree with the dashboard set to All time.
 
 ## Common commands
 
