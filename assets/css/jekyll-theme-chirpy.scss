@@ -65,6 +65,20 @@
   }
 }
 
+/* The post-page view count is hidden until JS has a real number for it, then
+   revealed via `.pv-ready` (see _includes/pageviews/goatcounter.html). Chirpy
+   renders a spinner as the element's initial state, but that markup is parsed
+   long before DOMContentLoaded, so on a long post the spinner turns for the
+   whole parse — and it spins forever if the count never arrives. Hiding until
+   ready matches how the post cards already behave: no number, no element. */
+.post-meta span:has(> #pageviews) {
+  display: none;
+
+  &.pv-ready {
+    display: inline;
+  }
+}
+
 /* Pageviews eye icon on post cards (see _layouts/home.html).
    Its box already lines up with the calendar/folder icons — identical top and
    bottom — but the folder glyph is bottom-heavy while the eye is mass-centered,

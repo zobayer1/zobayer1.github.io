@@ -1,30 +1,50 @@
 <!--
   Local override of the theme's post-page pageviews include (copied from
-  jekyll-theme-chirpy 7.5.0). The only change from upstream is `cache: 'no-cache'`
-  on the fetch — see the comment below. Re-apply it after a theme bump.
+  jekyll-theme-chirpy 7.5.0). Changes from upstream:
+
+    - counts come from the Worker in `worker/` via `pageviews/counts-store.html`,
+      instead of GoatCounter's public `/counter/` endpoint, which their edge
+      caches for ~4h
+
+    - the request starts at parse time rather than on DOMContentLoaded (see the
+      store include)
+
+    - upstream's spinner never shows. The line is hidden by CSS and revealed with
+      `.pv-ready` once there is a real number; on failure it simply stays hidden.
+      Upstream instead spins forever, or writes "1" — a fallback indistinguishable
+      from a genuine count of 1, which once disguised a GoatCounter outage on this
+      site as real data.
+
+  Re-check all of this after a theme bump.
 -->
-<!-- Display GoatCounter pageviews -->
+{% include pageviews/counts-store.html %}
+
 <script>
   document.addEventListener('DOMContentLoaded', () => {
     const pv = document.getElementById('pageviews');
 
-    if (pv !== null) {
-      const uri = location.pathname.replace(/\/$/, '');
-      const url = `https://{{ site.analytics.goatcounter.id }}.goatcounter.com/counter/${encodeURIComponent(uri)}.json`;
-
-      /* LOCAL: `no-cache` revalidates instead of reusing the browser's copy.
-         GoatCounter sends `Expires: +4h`, so a reload can otherwise pin an
-         already-stale body for 4 more hours. Their edge still absorbs the
-         request — the ~4h floor is theirs and can't be beaten from here. */
-      fetch(url, { cache: 'no-cache' })
-        .then((response) => response.json())
-        .then((data) => {
-          const count = data.count.replace(/\D/g, '');
-          pv.innerText = new Intl.NumberFormat().format(count);
-        })
-        .catch((error) => {
-          pv.innerText = '1';
-        });
+    if (pv === null) {
+      return;
     }
+
+    /* GoatCounter stores paths with the trailing slash trimmed. */
+    const uri = location.pathname.replace(/\/$/, '');
+
+    window.pvCounts
+      .then((counts) => {
+        /* Absent means no views recorded yet — not an error, but there is
+           nothing honest to display either. */
+        if (counts[uri] === undefined) {
+          return Promise.reject(`no count for ${uri}`);
+        }
+
+        pv.innerText = new Intl.NumberFormat().format(counts[uri]);
+
+        /* `pv` is the <em>; its parent <span> carries the "views" label too. */
+        pv.parentElement.classList.add('pv-ready');
+      })
+      .catch(() => {
+        /* Leave the line hidden. */
+      });
   });
 </script>

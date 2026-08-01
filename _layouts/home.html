@@ -10,9 +10,10 @@ layout: default
 
 {% include lang.html %}
 
-<!-- LOCAL: pageviews on post cards — mirrors the guard in the theme's js-selector.html -->
-{% assign pv_id = site.analytics.goatcounter.id %}
-{% if site.pageviews.provider == 'goatcounter' and pv_id and pv_id != empty %}
+<!-- LOCAL: pageviews on post cards. Counts come from the Worker in `worker/`, so
+     the proxy URL — not the GoatCounter id — is what gates this. -->
+{% assign pv_proxy = site.pageviews.proxy %}
+{% if pv_proxy and pv_proxy != empty %}
   {% assign show_pageviews = true %}
 {% endif %}
 

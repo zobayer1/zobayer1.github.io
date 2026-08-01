@@ -5,10 +5,16 @@
   `_includes/pageviews/goatcounter.html`, which targets the single `#pageviews`
   element on a post page; this handles the many cards on a list page.
 
-  Each card is hidden until its count arrives, so a slow or unavailable counter
-  degrades to the card simply not showing a view count — no spinners, no
+  Counts come from the Worker in `worker/` via `pageviews/counts-store.html`,
+  which returns every path in one response — so this is a single request no
+  matter how many cards are on the page, and none at all on a repeat visit.
+
+  Each card stays hidden until its count arrives, so a slow or unavailable
+  counter degrades to the card simply not showing a view count — no spinners, no
   misleading fallback number.
 -->
+{% include pageviews/counts-store.html %}
+
 <script>
   document.addEventListener('DOMContentLoaded', () => {
     const items = document.querySelectorAll('#post-list .pv-count[data-pv-path]');
@@ -19,19 +25,17 @@
 
     const formatter = new Intl.NumberFormat();
 
-    items.forEach((item) => {
-      /* GoatCounter stores paths with the trailing slash trimmed. */
-      const uri = item.dataset.pvPath.replace(/\/$/, '');
-      const url = `https://{{ site.analytics.goatcounter.id }}.goatcounter.com/counter/${encodeURIComponent(uri)}.json`;
+    window.pvCounts
+      .then((counts) => {
+        items.forEach((item) => {
+          /* The Worker keys paths the way GoatCounter stores them: trailing
+             slash trimmed. A path with no views is absent from the map. */
+          const count = counts[item.dataset.pvPath.replace(/\/$/, '')];
 
-      /* `no-cache` revalidates instead of reusing the browser's copy. GoatCounter
-         sends `Expires: +4h`, so a reload can otherwise pin an already-stale body
-         for 4 more hours. Their edge still absorbs the request — the ~4h floor is
-         theirs and can't be beaten from here. */
-      fetch(url, { cache: 'no-cache' })
-        .then((response) => (response.ok ? response.json() : Promise.reject(response.status)))
-        .then((data) => {
-          const count = data.count.replace(/\D/g, '');
+          if (count === undefined) {
+            return;
+          }
+
           item.innerText = formatter.format(count);
           item.classList.remove('d-none');
 
@@ -41,10 +45,10 @@
           if (icon) {
             icon.classList.remove('d-none');
           }
-        })
-        .catch(() => {
-          /* Leave the count hidden. */
         });
-    });
+      })
+      .catch(() => {
+        /* Leave the counts hidden. */
+      });
   });
 </script>

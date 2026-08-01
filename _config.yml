@@ -77,6 +77,11 @@ analytics:
 # Page views settings
 pageviews:
   provider: goatcounter # now only supports 'goatcounter'
+  # Local addition. URL of the Cloudflare Worker in `worker/`, which reads
+  # GoatCounter's authenticated API and returns every path's count in one JSON
+  # response. Counts simply stop appearing if this is empty — there is no
+  # fallback to GoatCounter's public counter, which lags ~4h. See CLAUDE.md.
+  proxy: https://zobayer-net-pageviews.zobayer1.workers.dev/
 
 # Prefer color scheme setting.
 #
@@ -217,6 +222,7 @@ exclude:
   - LICENSE-THEME
   - "*.config.js"
   - package*.json
+  - worker
 
 jekyll-archives:
   enabled: [categories, tags]

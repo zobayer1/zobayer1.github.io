@@ -1,0 +1,52 @@
+<!--
+  Shared source of view counts for the two pageviews includes (local addition,
+  no upstream counterpart).
+
+  Two jobs:
+
+  - Start the request as early as possible. On a post page this runs from <head>,
+    long before the element it feeds is parsed, so waiting for DOMContentLoaded
+    just to *start* fetching leaves the count blank for the whole of a long
+    post's parse. Kick the request off now; paint when the DOM is ready.
+
+  - Keep the last response in localStorage for MAX_AGE, so a repeat visit has its
+    numbers in hand without touching the network at all. The Worker also sends
+    `max-age=60`, but the HTTP cache can only be consulted by making a request,
+    and a request is what we are trying to avoid here.
+
+  Exposes `window.pvCounts`, a promise for the path -> count map. It rejects when
+  there is nothing usable, and callers then leave their element hidden rather
+  than show a placeholder.
+-->
+<script>
+  window.pvCounts =
+    window.pvCounts ||
+    (() => {
+      const KEY = 'pv-counts';
+      const MAX_AGE = 60000;
+
+      let stored = null;
+
+      try {
+        stored = JSON.parse(localStorage.getItem(KEY) || 'null');
+      } catch (e) {
+        /* Corrupt entry — treat it as absent. */
+      }
+
+      if (stored && stored.data && Date.now() - stored.at < MAX_AGE) {
+        return Promise.resolve(stored.data);
+      }
+
+      return fetch('{{ site.pageviews.proxy }}')
+        .then((response) => (response.ok ? response.json() : Promise.reject(response.status)))
+        .then((data) => {
+          try {
+            localStorage.setItem(KEY, JSON.stringify({ at: Date.now(), data }));
+          } catch (e) {
+            /* Private mode or quota — counts still work for this page load. */
+          }
+
+          return data;
+        });
+    })();
+</script>
