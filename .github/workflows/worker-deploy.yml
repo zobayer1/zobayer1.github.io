@@ -1,0 +1,40 @@
+name: "Deploy Worker"
+on:
+  push:
+    branches:
+      - main
+      - master
+    paths:
+      - worker/**
+      - .github/workflows/worker-deploy.yml
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Allow one concurrent deployment
+concurrency:
+  group: "worker"
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Deploy Worker
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: worker
+          # Pinned to the version in package.json, so CI and local deploys agree.
+          wranglerVersion: "4.118.0"
+          # Note: deliberately no `secrets:` input. Worker secrets live in
+          # Cloudflare and survive redeploys, so GOATCOUNTER_TOKEN never needs to
+          # exist in GitHub. Adding it here would only widen where it is stored.

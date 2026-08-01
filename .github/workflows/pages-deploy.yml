@@ -8,6 +8,8 @@ on:
       - .gitignore
       - README.md
       - LICENSE
+      # Deployed by worker-deploy.yml, and excluded from the Jekyll build anyway.
+      - worker/**
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
