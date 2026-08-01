@@ -14,6 +14,9 @@ _site
 node_modules
 package-lock.json
 
+# Cloudflare Worker local secrets — holds the GoatCounter API token in plaintext
+.dev.vars
+
 # IDE configurations
 .idea
 .vscode/*

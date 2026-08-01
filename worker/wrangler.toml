@@ -1,0 +1,14 @@
+name = "zobayer-net-pageviews"
+main = "src/index.js"
+compatibility_date = "2026-08-01"
+
+# Public, non-secret config. The API token is NOT here — it goes in as a secret:
+#   npx wrangler secret put GOATCOUNTER_TOKEN
+[vars]
+GOATCOUNTER_SITE = "zobayer1"
+
+# Shared cache across all edge locations. Create it once, then paste the id here:
+#   npx wrangler kv namespace create PV_CACHE
+[[kv_namespaces]]
+binding = "PV_CACHE"
+id = "b52c3930cdea4dad881abe02689bb634"
