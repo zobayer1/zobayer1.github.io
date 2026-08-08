@@ -10,7 +10,7 @@ If you are designing RESTful APIs, designing the URLs is always a challenge. In 
 
 ### URL Root Prefix
 
-Always specify a root prefix for your RESTful project. Whether it can be a generic word like `api`, `rest`, or `service` really depends on the domain. If the domain is already self-explanatory — say `api.tardy.com`, or a dedicated `tardy.com` — then a generic `/api` prefix (or none at all) is perfectly fine. But when several services share a single host or domain, prefer a single ASCII lowercase word tied to the project, so each stays distinguishable. For example `/tardy`, `/panacea`, etc. If you must use multiple words, separate them with a dash (`-`), for example `/tardy-api`.
+Always specify a root prefix for your RESTful project. Whether it can be a generic word like `api`, `rest`, or `service` really depends on the domain. If the domain is already self-explanatory, for example, `api.tardy.com`, or a dedicated `tardy.com`, then a generic `/api` prefix (or none at all) is perfectly fine. But when several services share a single host or domain, prefer a single ASCII lowercase word tied to the project, so each stays distinguishable. For example `/tardy`, `/panacea`, etc. If you must use multiple words, separate them with a dash (`-`), for example `/tardy-api`.
 
 A root prefix is helpful because it can be used with load balancers like HAProxy, or for URL redirection when there are multiple deployments on one machine.
 
@@ -55,7 +55,7 @@ Will your code ever put a check whether you won’t let someone create identifie
 | [GET]  /tardy/v1/guest/me        | [GET]  /tardy/v1/guest/me          |
 | [GET]  /tardy/v1/guest/guest1001 | [GET]  /tardy/v1/guest/g/guest1001 |
 
-Several popular online services use a pattern like this — LinkedIn's `/in/{profile}`, for instance — and for good reasons. It does not have to be a single letter, you can use whatever you want, as long as it remains meaningful.
+Several popular online services use a pattern like this and for good reasons. It does not have to be a single letter, you can use whatever you want, as long as it remains meaningful. For example: LinkedIn's `/in/{profile}`.
 
 
 ### Avoid Consecutive Identifiers

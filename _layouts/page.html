@@ -1,0 +1,28 @@
+---
+layout: default
+---
+
+{% include lang.html %}
+
+<article class="px-1">
+  {% if page.layout == 'page' or page.collection == 'tabs' %}
+    {% assign tab_key = page.title | downcase %}
+    {% assign title = site.data.locales[lang].tabs[tab_key] | default: page.title %}
+    <!-- LOCAL: allow a page to override just the <h1> via `heading` in front matter.
+         Upstream renders `title` here, but that same value also feeds the browser
+         <title> in the theme's _includes/head.html — and that lookup is
+         `site.data.locales[lang].tabs[tab_key]` with no `| default:`, so giving a
+         tab a title that is not a locale key silently produces an empty <title>.
+         Keeping `title` canonical (nav, <title>, SEO) and layering `heading` on top
+         decouples the visible headline from it. See _tabs/about.md. -->
+    {% assign title = page.heading | default: title %}
+    <h1 class="dynamic-title">
+      {{ title }}
+    </h1>
+    <div class="content">
+      {{ content }}
+    </div>
+  {% else %}
+    {{ content }}
+  {% endif %}
+</article>

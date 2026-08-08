@@ -13,15 +13,25 @@ internals, run `bundle info --path jekyll-theme-chirpy`.
 This is a content repo, not theme development. Most of what you'll do is author Markdown
 posts/pages and adjust `_config.yml`.
 
+`README.md` and `docs/local-development.md` are the human-facing versions of the setup/deploy
+material below — keep them in sync when any of it changes.
+
 ### Theme overrides
 
-A file in this repo's `_layouts/` or `_includes/` shadows the gem's file of the same path, so
-overrides are copies that drift from upstream and **must be re-checked after a theme bump**.
-Current overrides:
+A file in this repo's `_layouts/`, `_includes/`, `_data/`, or `assets/` shadows the gem's file of
+the same path, so overrides are copies that drift from upstream and **must be re-checked after a
+theme bump**. The resolved theme version is in `Gemfile.lock` (currently 7.5.0). Current
+overrides:
 
 - `_layouts/home.html` — copy of Chirpy 7.5.0's, plus three blocks marked `LOCAL:` that add a
   GoatCounter view count to each post card's meta row. Diff against
   `$(bundle info --path jekyll-theme-chirpy)/_layouts/home.html` after upgrading and re-apply.
+- `_layouts/page.html` — copy of Chirpy 7.5.0's, plus one `LOCAL:` line letting front matter
+  override just the `<h1>` via a `heading` key (used by `_tabs/about.md`). Setting `title` instead
+  would not work: the theme's `_includes/head.html` builds the browser `<title>` for tabs from
+  `site.data.locales[lang].tabs[tab_key]` **with no `| default:` fallback** (unlike `page.html`,
+  which has one), so a tab whose title is not a key in `_data/locales/en.yml` renders an empty
+  `<title>`. Keeping `title` canonical and layering `heading` on top avoids that.
 - `_includes/pageviews/goatcounter-list.html` — new file, no upstream counterpart. Fills in the
   counts on post cards. The theme's own `pageviews/goatcounter.html` handles post pages only.
 - `_includes/pageviews/goatcounter.html` — copy of Chirpy 7.5.0's, changed to read from the
@@ -35,6 +45,14 @@ Current overrides:
   `pageviews.proxy` to the service worker's `interceptor.urlPrefixes`. The service worker is
   cache-first and ignores `Cache-Control`, so without this it stores the Worker's response on
   first visit and replays it until the next deploy rotates `cacheName` — freezing every count.
+- `_data/` (`authors.yml`, `contact.yml`, `media.yml`, `share.yml`, `locales/`, `origin/`) —
+  vendored wholesale from the theme's *source* repo (not the gem), so it is invisible drift: the
+  gem ships its own copies and these silently win. Only `contact.yml` carries local edits (a
+  LinkedIn entry, and the X icon for the Twitter row). Re-check after a theme bump.
+- `assets/css/jekyll-theme-chirpy.scss` — Chirpy's designated customization entry point, not a
+  shadow copy, so a theme bump does not invalidate it. Holds the sidebar brand font, the enlarged
+  avatar, the widened sidebar (breakpoints must stay in sync with the theme's `lg`/`xxxl`), and
+  the `.pv-ready` visibility rule described under Page view counts.
 
 ## Page view counts
 
@@ -97,12 +115,15 @@ First-time setup: `mise install` (installs the pinned Ruby) then `bundle install
 
 
 - **Serve locally with livereload:** `bash tools/run.sh` (wraps `bundle exec jekyll s -l`).
-  Add `-p`/`--production` for production mode, `-H <host>` to change bind host. Inside Docker it
-  auto-adds `--force_polling`.
+  Add `-p`/`--production` for production mode, `-d`/`--drafts` to render `_drafts/` (implies
+  `--future`), `-H <host>` to change bind host. Inside Docker it auto-adds `--force_polling`.
 - **Build + link-check:** `bash tools/test.sh` — does a `JEKYLL_ENV=production` build into
   `_site` then runs `htmlproofer` (external URLs disabled, localhost ignored). Pass
-  `-c "<config_a,config_b>"` for alternate configs.
+  `-c "<config_a,config_b>"` for alternate configs. CI does not run this, so it is the only
+  link-checking that happens.
 - **Plain build:** `bundle exec jekyll b -d _site`.
+- **`tools/init.sh` is destructive and unused here** — it is the inherited chirpy-starter
+  bootstrap, which hard-resets to the theme release commit and wipes `_posts/`. Never run it.
 
 ## Deployment
 
@@ -139,8 +160,11 @@ after the change is committed.
 ## Static assets & CDN
 
 - `assets/lib` is a **git submodule** ([chirpy-static-assets](https://github.com/cotes2020/chirpy-static-assets))
-  providing self-hosted JS/CSS libraries (`assets.self_host.enabled: true`). Run
-  `git submodule update --init` after cloning, or builds/CI will be missing vendored assets.
+  providing self-hosted JS/CSS libraries. `assets.self_host` is `enabled: true` but scoped to
+  `env: development`, so the submodule is what **local dev** loads (via `_data/origin/basic.yml`)
+  while production builds go to jsDelivr (`_data/origin/cors.yml`). Practical consequence: a
+  clone without `git submodule update --init` serves a local site with broken fonts, icons, TOC,
+  and search, while production is unaffected. CI checks out submodules anyway.
 - Media resources (avatar, post images, etc.) whose paths start with `/` are rewritten to the CDN
   `https://storage.googleapis.com/glitchfest-pub` (`cdn:` in `_config.yml`) — a public
   Google Cloud Storage bucket served over Google's own TLS.
@@ -154,3 +178,7 @@ toward *building the theme itself*. They operate on `_javascript/` and `_sass/` 
 `stylelint`/`rollup`/`purgecss` scripts to be part of the normal content workflow — the real build
 is the Jekyll build above. Treat this Node tooling as vendored/vestigial unless you are
 intentionally importing theme-source files to customize the theme locally.
+
+The one live dependency in that file is **`wrangler`**, added locally for the Worker. Its version
+is deliberately mirrored by `wranglerVersion` in `.github/workflows/worker-deploy.yml` so CI and
+local `npx wrangler deploy` agree — bump both together or not at all.

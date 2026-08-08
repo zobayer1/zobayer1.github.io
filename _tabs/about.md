@@ -1,12 +1,15 @@
 ---
 # the default layout is 'page'
+# `heading` replaces the <h1> only; it is a local addition handled by this repo's
+# _layouts/page.html override. Deliberately not `title` — the theme derives the
+# browser <title> from the title, and its lookup has no fallback, so a title that
+# is not a key in _data/locales/en.yml renders an empty <title>.
+heading: "Hi! I’m Zobayer"
 icon: fas fa-info-circle
 order: 4
 ---
 
 ![Zobayer Hasan](/commons/avatar.png){: .right .w-25 .rounded-circle }
-
-#### Hi! I’m Zobayer.
 
 Just a tech guy making a living in the world of software engineering.
 
