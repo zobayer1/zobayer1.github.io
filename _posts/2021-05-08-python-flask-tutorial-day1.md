@@ -93,7 +93,7 @@ setup(
 
 **[`setup.cfg`](https://github.com/zobayer1/flask-restful-tutorial/blob/part-1/setup.cfg)** simply configures the behavior of the various setup commands for our project. This file is used in conjunction with `setup.py` file to supply metadata to the `setup()` function. We won't need to add much in `setup.cfg` file:
 
-```conf
+```ini
 [metadata]
 license_files = LICENSE
 ```
@@ -227,7 +227,7 @@ touch tests/__init__.py
 
 We will use `tox` and `pytest` for testing this project, and `coverage` to generate code coverage reports. Rather than installing these ad-hoc, let's declare them as a **dev dependency** group in `setup.cfg` so they are recorded with the project:
 
-```conf
+```ini
 [options.extras_require]
 dev =
     codecov
@@ -266,7 +266,7 @@ deps =
 
 Let's add a **[`.coveragerc`](https://github.com/zobayer1/flask-restful-tutorial/blob/part-1/.coveragerc)** file to configure code coverage:
 
-```conf
+```ini
 [run]
 omit =
     myapi/manage.py

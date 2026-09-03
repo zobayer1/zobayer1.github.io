@@ -25,7 +25,7 @@ In part 1, we kept the dependency list inline in `setup.py` via `install_require
 
 **[`setup.cfg`](https://github.com/zobayer1/flask-restful-tutorial/blob/part-2/setup.cfg):**
 
-```conf
+```ini
 [metadata]
 license_files = LICENSE
 
