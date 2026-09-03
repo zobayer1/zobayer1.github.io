@@ -8,20 +8,22 @@ math: true
 ---
 The title sounds like a linear-algebra exercise, but this isn't about computing a matrix's power for its own sake. It's a technique that turns matrix powers into a way to jump straight to the $n$'th term of a recurrence in logarithmic time. Very handy when $n$ is enormous.
 
-Sometimes a problem has an easy recurrence (e.g. a dynamic programming problem), but constraints make DP hopeless. Take the $n$'th Fibonacci number, $f(n) = f(n-1) + f(n-2)$. For small $n$, plain recursion or DP handles it fine. But what if the problem asks: *given $0 < n < 10^9$, find $f(n) \bmod 999983$*; DP will not save you here!
+Sometimes a problem has an easy recurrence, but the constraints make dynamic programming (DP) hopeless. Take the $n$'th Fibonacci number, $f(n) = f(n-1) + f(n-2)$. For small $n$, plain recursion or DP handles it fine. But what if the problem asks: *find $f(n) \bmod 999983$, given, $1 \leq n \leq 10^9$*. DP will not help you here!
 
-That's where matrix exponentiation comes in. We'll get to how and why it works later, but first, let's see how it represents a recurrence relation.
+That's where matrix exponentiation comes in. We'll get to how and why it works later, but first, let's see how matrix multiplication represents a recurrence relation.
 
 > This technique works only for **linear** recurrences. Matrix exponentiation cannot be used to directly compute non-linear recurrences (e.g. $f(n) = f(n-1)^2 + 3$). The requirement is that the transition between steps must be a strictly linear combination of the previous terms.
 {: .prompt-warning }
 
+> **Good to know:** neither concept below is required to follow the idea, but both are worth having when you sit down to implement it.
+>
+> **Basic matrix operations:** given two matrices, find their product. Remember, matrix multiplication is not commutative, so generally $A \times B \neq B \times A$. It commutes when one of them is an [identity matrix](https://en.wikipedia.org/wiki/Identity_matrix), when they are [inverses](https://en.wikipedia.org/wiki/Invertible_matrix) of each other, or when both are [diagonal matrices](https://en.wikipedia.org/wiki/Diagonal_matrix).
+>
+> **Fast modular exponentiation:** given a matrix $M$ of size $d \times d$, find $(M^n \bmod m)$ in $O(d^3 \log n)$ time. Modulo $m$ prevents overflow. See the [algorithmic concept](https://www.geeksforgeeks.org/dsa/modular-exponentiation-power-in-modular-arithmetic/).
+{: .prompt-info }
+
 > The reader is encouraged to try and verify the equations shown in this post with pen and paper.
 {: .prompt-tip }
-
-## **Good to Know**
-
-- Basic matrix operations: Given two matrices, find their product. Remember, matrix multiplication is not commutative: generally $A \times B \neq B \times A$. It commutes when one of them is an [identity matrix](https://en.wikipedia.org/wiki/Identity_matrix), when they are [inverses](https://en.wikipedia.org/wiki/Invertible_matrix) of each other, or when both are [diagonal matrices](https://en.wikipedia.org/wiki/Diagonal_matrix).
-- Fast modular exponentiation: Given a matrix $M$ of size $d \times d$, find $(M^n \bmod m)$ in $O(d^3 \log n)$ time. Modulo $m$ prevents overflow. Example [implementation](https://www.geeksforgeeks.org/dsa/modular-exponentiation-power-in-modular-arithmetic/).
 
 ## **Design State Matrices**
 
