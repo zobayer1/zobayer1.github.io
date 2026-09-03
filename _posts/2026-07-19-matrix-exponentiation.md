@@ -225,16 +225,18 @@ $$
 f(n) = (n \bmod 2) \cdot f(n-1) + (1 - n \bmod 2) \cdot f(n-2)
 $$
 
-Here we can just split on the basis of parity and keep two different matrices; one for each case. As always, the state is
+Here we can just split on the basis of parity and keep two different matrices; one for each case.
+
+Initial state:
 
 $$
-A = \begin{bmatrix} f(n) \\ f(n-1) \end{bmatrix},
+A = \begin{bmatrix} f(n) \\ f(n-1) \end{bmatrix}
 $$
 
 and we advance it to
 
 $$
-B = \begin{bmatrix} f(n+1) \\ f(n) \end{bmatrix}.
+B = \begin{bmatrix} f(n+1) \\ f(n) \end{bmatrix}
 $$
 
 Which matrix we use depends on the parity of the index we are producing, $n+1$.
