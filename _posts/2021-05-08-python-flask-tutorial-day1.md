@@ -16,21 +16,21 @@ In part 1 of this series, we will focus on:
 * Adding an endpoint and testing
 * Preparing distribution packages and deployment
 
-> **Where the code lives.** The full source is in the [flask-restful-boilerplate](https://github.com/zobayer1/flask-restful-boilerplate) repo, organized one branch per part. This post corresponds to the `part-1` branch. Check out `part-1` to explore the code shown here.
+> **Where the code lives.** The full source is in the [flask-restful-tutorial](https://github.com/zobayer1/flask-restful-tutorial) repo, organized one branch per part. This post corresponds to the `part-1` branch. Check out `part-1` to explore the code shown here.
 {: .prompt-info }
 
 ## **Add initial files**
 
-Alright, let's start by creating our project's root directory and call it `flask-restful-boilerplate` — the same name as the Github repository. All our project files will reside within this directory. Let's quickly create three essential files within this directory:
+Alright, let's start by creating our project's root directory and call it `flask-restful-tutorial` — the same name as the Github repository. All our project files will reside within this directory. Let's quickly create three essential files within this directory:
 
-* `README.md`: A README file. It often serves the purpose of an introductory page for the project. We should include developer instructions in this file. [Here's an example README file](https://raw.githubusercontent.com/zobayer1/flask-restful-boilerplate/part-1/README.md).
-* `LICENSE`: A license file. Typically this will contain copyright notices for our project. For this exercise, we will simply start with a [MIT license](https://github.com/zobayer1/flask-restful-boilerplate/blob/part-1/LICENSE). [https://choosealicense.com](https://choosealicense.com) is quite helpful for finding the correct license.
-* `.gitignore`: A gitignore file. We do not want everything from our project directory to end up in the version control tree. [Here is an example gitignore file](https://raw.githubusercontent.com/zobayer1/flask-restful-boilerplate/part-1/.gitignore).
+* `README.md`: A README file. It often serves the purpose of an introductory page for the project. We should include developer instructions in this file. [Here's an example README file](https://raw.githubusercontent.com/zobayer1/flask-restful-tutorial/part-1/README.md).
+* `LICENSE`: A license file. Typically this will contain copyright notices for our project. For this exercise, we will simply start with a [MIT license](https://github.com/zobayer1/flask-restful-tutorial/blob/part-1/LICENSE). [https://choosealicense.com](https://choosealicense.com) is quite helpful for finding the correct license.
+* `.gitignore`: A gitignore file. We do not want everything from our project directory to end up in the version control tree. [Here is an example gitignore file](https://raw.githubusercontent.com/zobayer1/flask-restful-tutorial/part-1/.gitignore).
 
 At this point, our project directory will look like this:
 
 ```bash
-flask-restful-boilerplate
+flask-restful-tutorial
 ├── .gitignore
 ├── LICENSE
 └── README.md
@@ -66,7 +66,7 @@ We install [`build`](https://pypi.org/project/build), the standard PEP 517 build
 
 We should be able to create source and binary distribution packages for our project. In order to do so, we have to add a few files, namely, `setup.py`, `setup.cfg` and `MANIFEST.in` at the root of our project.
 
-**[`setup.py`](https://github.com/zobayer1/flask-restful-boilerplate/blob/part-1/setup.py)** is the script `setuptools` uses to build and package our project. Its `setup()` call describes the package and its metadata. Learn more about [writing setup scripts here](https://docs.python.org/3/distutils/setupscript.html). Let's start with a simple `setup.py`, and feel free to add or change values in `setup()` as necessary:
+**[`setup.py`](https://github.com/zobayer1/flask-restful-tutorial/blob/part-1/setup.py)** is the script `setuptools` uses to build and package our project. Its `setup()` call describes the package and its metadata. Learn more about [writing setup scripts here](https://docs.python.org/3/distutils/setupscript.html). Let's start with a simple `setup.py`, and feel free to add or change values in `setup()` as necessary:
 
 ```python
 # -*- coding: utf-8 -*-
@@ -79,7 +79,7 @@ install_dependencies = [
 
 setup(
     name="myapi",
-    url="https://github.com/zobayer1/flask-restful-boilerplate",
+    url="https://github.com/zobayer1/flask-restful-tutorial",
     license="MIT",
     author="Zobayer Hasan",
     use_scm_version=True,
@@ -91,7 +91,7 @@ setup(
 )
 ```
 
-**[`setup.cfg`](https://github.com/zobayer1/flask-restful-boilerplate/blob/part-1/setup.cfg)** simply configures the behavior of the various setup commands for our project. This file is used in conjunction with `setup.py` file to supply metadata to the `setup()` function. We won't need to add much in `setup.cfg` file:
+**[`setup.cfg`](https://github.com/zobayer1/flask-restful-tutorial/blob/part-1/setup.cfg)** simply configures the behavior of the various setup commands for our project. This file is used in conjunction with `setup.py` file to supply metadata to the `setup()` function. We won't need to add much in `setup.cfg` file:
 
 ```conf
 [metadata]
@@ -108,7 +108,7 @@ build-backend = "setuptools.build_meta"
 
 We will expand this file later with configuration for our development tools.
 
-**[`MANIFEST.in`](https://github.com/zobayer1/flask-restful-boilerplate/blob/part-1/MANIFEST.in)** is a manifest template file that contains instructions about how to generate the `MANIFEST` file, which is the exact list of files to include in our source distribution. Let's start with adding inclusion and exclusion rules for our project:
+**[`MANIFEST.in`](https://github.com/zobayer1/flask-restful-tutorial/blob/part-1/MANIFEST.in)** is a manifest template file that contains instructions about how to generate the `MANIFEST` file, which is the exact list of files to include in our source distribution. Let's start with adding inclusion and exclusion rules for our project:
 
 ```bash
 exclude .pre-commit-config.yaml
@@ -122,7 +122,7 @@ recursive-include tests *.py
 Note that we haven't created some of these files yet. Don't worry about these files now, we will be creating them in the next section. At this point, our directory should look like this:
 
 ```bash
-flask-restful-boilerplate
+flask-restful-tutorial
 ├── .gitignore
 ├── LICENSE
 ├── MANIFEST.in
@@ -152,7 +152,7 @@ pip install pre-commit
 pre-commit install
 ```
 
-To define our pre-commit hooks, let's create a file **[`.pre-commit-config.yaml`](https://github.com/zobayer1/flask-restful-boilerplate/blob/part-1/.pre-commit-config.yaml)**:
+To define our pre-commit hooks, let's create a file **[`.pre-commit-config.yaml`](https://github.com/zobayer1/flask-restful-tutorial/blob/part-1/.pre-commit-config.yaml)**:
 
 ```yaml
 repos:
@@ -180,7 +180,7 @@ repos:
 
 We no longer have to worry much about code styling, `black` reformats our code to a standard style adopted across the Python community. Learn more at [black's official repository](https://github.com/psf/black).
 
-Earlier we created a minimal **[`pyproject.toml`](https://github.com/zobayer1/flask-restful-boilerplate/blob/part-1/pyproject.toml)** with just the `[build-system]` table. This file also lets us keep configuration for other tools in one convenient place. Append the following to the `pyproject.toml` file:
+Earlier we created a minimal **[`pyproject.toml`](https://github.com/zobayer1/flask-restful-tutorial/blob/part-1/pyproject.toml)** with just the `[build-system]` table. This file also lets us keep configuration for other tools in one convenient place. Append the following to the `pyproject.toml` file:
 
 ```toml
 [tool.black]
@@ -244,7 +244,7 @@ Now install the project in editable mode along with its dev dependencies:
 pip install -e '.[dev]'
 ```
 
-We will need a **[`tox.ini`](https://github.com/zobayer1/flask-restful-boilerplate/blob/part-1/tox.ini)** file to configure our test environments. For now, we will add Python 3.8, but other python environments can be easily added in a similar fashion.
+We will need a **[`tox.ini`](https://github.com/zobayer1/flask-restful-tutorial/blob/part-1/tox.ini)** file to configure our test environments. For now, we will add Python 3.8, but other python environments can be easily added in a similar fashion.
 
 ```ini
 [tox]
@@ -264,7 +264,7 @@ deps =
     pytest-cov
 ```
 
-Let's add a **[`.coveragerc`](https://github.com/zobayer1/flask-restful-boilerplate/blob/part-1/.coveragerc)** file to configure code coverage:
+Let's add a **[`.coveragerc`](https://github.com/zobayer1/flask-restful-tutorial/blob/part-1/.coveragerc)** file to configure code coverage:
 
 ```conf
 [run]
@@ -285,7 +285,7 @@ Our test harness is now configured. There is nothing to test yet, so we will run
 At this point, our project directory should include these (not including gitignored files and directories):
 
 ```bash
-flask-restful-boilerplate
+flask-restful-tutorial
 ├── .coveragerc
 ├── .gitignore
 ├── LICENSE
@@ -313,7 +313,7 @@ touch myapi/__init__.py
 
 Now we will create a few files that define our Flask application.
 
-**[`myapi/config.py`](https://github.com/zobayer1/flask-restful-boilerplate/blob/part-1/myapi/config.py):**
+**[`myapi/config.py`](https://github.com/zobayer1/flask-restful-tutorial/blob/part-1/myapi/config.py):**
 
 Behavior of a Flask application can be controlled by a number of [configuration parameters](https://flask.palletsprojects.com/en/1.1.x/config). A common practice is to load these configurations from a file or a python object instead of manually updating Flask's `app.config` dictionary. A lot of example applications tend to create several different configuration classes in `config.py` file for various environments such as `development`, `production` and `testing`. But this is not necessary, because a Flask application only runs with one environment configuration, which means we would be creating classes that are never used. A better approach is to use `config.py` file as a set of default configurations, or a way of loading custom environment variables into the application. Later we will see how we can use instance specific configurations to load configurations for different environments.
 
@@ -325,7 +325,7 @@ ENV = os.getenv("FLASK_ENV", "development")
 SECRET_KEY = os.getenv("FLASK_SECRET", "bb9ba2817ef62e261d3adaf90c2727bb").encode("utf-8")
 ```
 
-**[`myapi/app.py`](https://github.com/zobayer1/flask-restful-boilerplate/blob/part-1/myapi/app.py):**
+**[`myapi/app.py`](https://github.com/zobayer1/flask-restful-tutorial/blob/part-1/myapi/app.py):**
 
 This is going to be our script for creating the actual Flask application. We will enrich this file in future as we add more features to our application.
 
@@ -356,7 +356,7 @@ def initialize_blueprints(app):
 
 We will talk about `instance_relative_config` in a later section.
 
-**[`myapi/wsgi.py`](https://github.com/zobayer1/flask-restful-boilerplate/blob/part-1/myapi/wsgi.py):**
+**[`myapi/wsgi.py`](https://github.com/zobayer1/flask-restful-tutorial/blob/part-1/myapi/wsgi.py):**
 
 A simple script exposing an app object which can be used as `FLASK_APP` parameter.
 
@@ -369,7 +369,7 @@ from myapi.app import create_app
 app = create_app(os.getenv("FLASK_ENV", "development"))
 ```
 
-**[`myapi/manage.py`](https://github.com/zobayer1/flask-restful-boilerplate/blob/part-1/myapi/manage.py):**
+**[`myapi/manage.py`](https://github.com/zobayer1/flask-restful-tutorial/blob/part-1/myapi/manage.py):**
 
 While this script isn't really necessary, it allows us to add custom scripts to our application. This can come in handy if we want to add some CLI routines, for example, application initialization, database migration, dependency check, etc. We will use [click](https://click.palletsprojects.com/en/7.x) for this.
 
@@ -465,7 +465,7 @@ Press CTRL+C to exit from the development server.
 
 ## **Add some tests**
 
-Now that we have our application ready, it's time to add our tests. Let's start by creating a **[`tests/conftest.py`](https://github.com/zobayer1/flask-restful-boilerplate/blob/part-1/tests/conftest.py)** file which will hold our shared pytest fixtures.
+Now that we have our application ready, it's time to add our tests. Let's start by creating a **[`tests/conftest.py`](https://github.com/zobayer1/flask-restful-tutorial/blob/part-1/tests/conftest.py)** file which will hold our shared pytest fixtures.
 
 ```python
 # -*- coding: utf-8 -*-
@@ -492,7 +492,7 @@ def runner(app):
     return app.test_cli_runner()
 ```
 
-Next, we will add some actual tests, let's create a **[`tests/test_config.py`](https://github.com/zobayer1/flask-restful-boilerplate/blob/part-1/tests/test_config.py)** with following tests:
+Next, we will add some actual tests, let's create a **[`tests/test_config.py`](https://github.com/zobayer1/flask-restful-tutorial/blob/part-1/tests/test_config.py)** with following tests:
 
 ```python
 # -*- coding: utf-8 -*-
@@ -557,7 +557,7 @@ This is great!! Now we are ready to add our first REST endpoint.
 
 ## **Add our first endpoint**
 
-We will be adding a simple health-check endpoint in our application. Endpoints like this are useful for a production environment as our load balancers can poll these endpoints to determine server states. First, let's add a test which will try to load `/myapi/v1/health/status`. Create a `test_health` package inside `tests` and add **[`tests/test_health/test_status.py`](https://github.com/zobayer1/flask-restful-boilerplate/blob/part-1/tests/test_health/test_status.py)** file:
+We will be adding a simple health-check endpoint in our application. Endpoints like this are useful for a production environment as our load balancers can poll these endpoints to determine server states. First, let's add a test which will try to load `/myapi/v1/health/status`. Create a `test_health` package inside `tests` and add **[`tests/test_health/test_status.py`](https://github.com/zobayer1/flask-restful-tutorial/blob/part-1/tests/test_health/test_status.py)** file:
 
 ```python
 # -*- coding: utf-8 -*-
@@ -573,7 +573,7 @@ def test_server_status_returns_success(client):
 
 Let's run tests with `pytest -s` and this test should fail.
 
-Now let's add the blueprint that exposes `/myapi/v1/health/status`. We will keep our HTTP endpoints under a versioned package, so create `myapi/endpoints/v1/` — each level is a python package with its own `__init__.py` file. Add the health endpoint in **[`myapi/endpoints/v1/health.py`](https://github.com/zobayer1/flask-restful-boilerplate/blob/part-1/myapi/endpoints/v1/health.py)**:
+Now let's add the blueprint that exposes `/myapi/v1/health/status`. We will keep our HTTP endpoints under a versioned package, so create `myapi/endpoints/v1/` — each level is a python package with its own `__init__.py` file. Add the health endpoint in **[`myapi/endpoints/v1/health.py`](https://github.com/zobayer1/flask-restful-tutorial/blob/part-1/myapi/endpoints/v1/health.py)**:
 
 ```python
 # -*- coding: utf-8 -*-

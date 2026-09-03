@@ -16,14 +16,14 @@ Part 2 picks up exactly where part 1 ended. Here we will:
 
 By the end of this part, we will tag the result as `v0.2.0`.
 
-> **Where the code lives.** The full source is in the [flask-restful-boilerplate](https://github.com/zobayer1/flask-restful-boilerplate) repo, organized one branch per part. This post corresponds to the `part-2` branch. Check out `part-2` to explore the code shown here.
+> **Where the code lives.** The full source is in the [flask-restful-tutorial](https://github.com/zobayer1/flask-restful-tutorial) repo, organized one branch per part. This post corresponds to the `part-2` branch. Check out `part-2` to explore the code shown here.
 {: .prompt-info }
 
 ## **Pinning dependencies in `setup.cfg`**
 
 In part 1, we kept the dependency list inline in `setup.py` via `install_requires`, with loose, unversioned names. That's fine for a quick start, but it's risky for a server: a fresh `pip install` can silently pull a newer release of Flask or one of its transitive dependencies, and suddenly the code that ran yesterday behaves differently. Pinning each dependency to an exact version keeps the build reproducible; every environment, from a developer's laptop to CI to production, resolves the same package set, so we get real dev/prod parity and no surprise upgrades. `setup.cfg` is a friendlier home for those pins too. It's declarative, and it lets us split test and dev dependencies into `extras_require`. Let's move them there:
 
-**[`setup.cfg`](https://github.com/zobayer1/flask-restful-boilerplate/blob/part-2/setup.cfg):**
+**[`setup.cfg`](https://github.com/zobayer1/flask-restful-tutorial/blob/part-2/setup.cfg):**
 
 ```conf
 [metadata]
@@ -60,7 +60,7 @@ A few things worth noting:
 
 With the dependencies declared here, `setup.py` is otherwise the same file from part 1; `install_requires` simply falls away, leaving project metadata, `use_scm_version`, the package-discovery rule, and the console-script entry point:
 
-**[`setup.py`](https://github.com/zobayer1/flask-restful-boilerplate/blob/part-2/setup.py):**
+**[`setup.py`](https://github.com/zobayer1/flask-restful-tutorial/blob/part-2/setup.py):**
 
 ```python
 # -*- coding: utf-8 -*-
@@ -68,7 +68,7 @@ from setuptools import find_packages, setup
 
 setup(
     name="myapi",
-    url="https://github.com/zobayer1/flask-restful-boilerplate",
+    url="https://github.com/zobayer1/flask-restful-tutorial",
     author="Zobayer Hasan",
     author_email="zobayer1@gmail.com",
     description="A RESTful application server template built with Python and Flask.",
@@ -89,7 +89,7 @@ The CLI entry point still points to `myapi.manage:cli`, so `myapi --help` keeps 
 
 With test dependencies declared in `setup.cfg`, `tox` can install our project with its test extras directly, with no separate dependency file to maintain.
 
-**[`tox.ini`](https://github.com/zobayer1/flask-restful-boilerplate/blob/part-2/tox.ini):**
+**[`tox.ini`](https://github.com/zobayer1/flask-restful-tutorial/blob/part-2/tox.ini):**
 
 ```ini
 [testenv]
@@ -139,7 +139,7 @@ Most of these `__init__.py` files hold nothing but the encoding header for now; 
 
 Part 1's health endpoint looked up the running version with `from importlib.metadata import version`, inlined right in the module. Now that we have a `commons/` layer, that belongs in a shared helper: it's the kind of utility more than one module will want, and it lets us paper over the Python 3.7 fallback once, in one place:
 
-**[`myapi/commons/helpers/metadata.py`](https://github.com/zobayer1/flask-restful-boilerplate/blob/part-2/myapi/commons/helpers/metadata.py):**
+**[`myapi/commons/helpers/metadata.py`](https://github.com/zobayer1/flask-restful-tutorial/blob/part-2/myapi/commons/helpers/metadata.py):**
 
 ```python
 # -*- coding: utf-8 -*-
@@ -157,7 +157,7 @@ def app_version(name: str) -> str:
 
 The only change to the health endpoint is to use it. Everything else about the route (the blueprint, the URL, the response) stays exactly as it was in part 1:
 
-**[`myapi/endpoints/v1/health.py`](https://github.com/zobayer1/flask-restful-boilerplate/blob/part-2/myapi/endpoints/v1/health.py):**
+**[`myapi/endpoints/v1/health.py`](https://github.com/zobayer1/flask-restful-tutorial/blob/part-2/myapi/endpoints/v1/health.py):**
 
 ```python
 # -*- coding: utf-8 -*-
@@ -271,7 +271,7 @@ We put this one under `testing/` because the test suite needs a known config to 
 
 We also need to tell Flask where the logging config lives:
 
-**[`myapi/config.py`](https://github.com/zobayer1/flask-restful-boilerplate/blob/part-2/myapi/config.py):**
+**[`myapi/config.py`](https://github.com/zobayer1/flask-restful-tutorial/blob/part-2/myapi/config.py):**
 
 ```python
 # -*- coding: utf-8 -*-
@@ -308,7 +308,7 @@ Two changes from part 1's `config.py`:
 
 The critical thing about initializing logging is **timing**. We need it set up before any other module starts logging, including Flask's own startup. So our `create_app` function calls our logging setup as its very first step, before `Flask(...)` is constructed:
 
-**[`myapi/app.py`](https://github.com/zobayer1/flask-restful-boilerplate/blob/part-2/myapi/app.py):**
+**[`myapi/app.py`](https://github.com/zobayer1/flask-restful-tutorial/blob/part-2/myapi/app.py):**
 
 ```python
 # -*- coding: utf-8 -*-
@@ -435,7 +435,7 @@ Part 1 already set up the CLI: `manage.py` wires a `FlaskGroup` so `myapi run` a
 > **This is a learning aid, not a production feature.** A command that dumps secrets and running configuration is fine for experimenting on your own machine, but you should never ship one in a real app. Keep commands like this out of anything that runs in production.
 {: .prompt-warning }
 
-**[`myapi/manage.py`](https://github.com/zobayer1/flask-restful-boilerplate/blob/part-2/myapi/manage.py):**
+**[`myapi/manage.py`](https://github.com/zobayer1/flask-restful-tutorial/blob/part-2/myapi/manage.py):**
 
 ```python
 # -*- coding: utf-8 -*-
@@ -489,7 +489,7 @@ Our tests have to keep up with the changes. Three things change here:
 2. We add a new CLI test for the `env` command.
 3. The existing config test gets a tiny touch-up for the shared `app_version` helper.
 
-Start with the updated **[`tests/conftest.py`](https://github.com/zobayer1/flask-restful-boilerplate/blob/part-2/tests/conftest.py)**:
+Start with the updated **[`tests/conftest.py`](https://github.com/zobayer1/flask-restful-tutorial/blob/part-2/tests/conftest.py)**:
 
 ```python
 # -*- coding: utf-8 -*-
@@ -527,7 +527,7 @@ def runner(app):
 
 We pass `"testing"` to `create_app`, exactly as in part 1, so it loads `instance/testing/`. The `os.environ.update(...)` above is about **test isolation**: a unit or integration test should behave identically no matter what a developer happens to have exported, so we pin every variable the app reads rather than inheriting the ambient shell. `FLASK_SECRET` is the one the app strictly requires: part 2's `config.py` dropped the hard-coded fallback and refuses to start without it. `LOGGING_ROOT=.` keeps the test log file (`myapi.log`) in the project root instead of wherever an ambient `LOGGING_ROOT` might point. `FLASK_ENV=testing` is belt-and-suspenders: `create_app("testing")` and the testing instance config already force the environment, but pinning it makes the intent explicit and guards against future code that reads it. We also add a `runner` fixture (a `FlaskCliRunner`) for testing CLI commands.
 
-The health-check test carries over from part 1 unchanged; the endpoint didn't move, so **[`tests/test_health/test_status.py`](https://github.com/zobayer1/flask-restful-boilerplate/blob/part-2/tests/test_health/test_status.py)** still hits `/myapi/v1/health/status`:
+The health-check test carries over from part 1 unchanged; the endpoint didn't move, so **[`tests/test_health/test_status.py`](https://github.com/zobayer1/flask-restful-tutorial/blob/part-2/tests/test_health/test_status.py)** still hits `/myapi/v1/health/status`:
 
 ```python
 # -*- coding: utf-8 -*-
@@ -541,7 +541,7 @@ def test_server_status_returns_success(client):
     assert json.loads(response.data).get("status") == "running"
 ```
 
-A new test for the CLI command goes in **[`tests/test_cli.py`](https://github.com/zobayer1/flask-restful-boilerplate/blob/part-2/tests/test_cli.py)**:
+A new test for the CLI command goes in **[`tests/test_cli.py`](https://github.com/zobayer1/flask-restful-tutorial/blob/part-2/tests/test_cli.py)**:
 
 ```python
 # -*- coding: utf-8 -*-
@@ -561,7 +561,7 @@ We use the `runner` fixture to invoke `myapi env` and check that all four enviro
 
 Finally, `tests/test_config.py` gets a tiny touch-up: it now imports `app_version` from our new `commons/helpers` package instead of calling `importlib.metadata` directly:
 
-**[`tests/test_config.py`](https://github.com/zobayer1/flask-restful-boilerplate/blob/part-2/tests/test_config.py):**
+**[`tests/test_config.py`](https://github.com/zobayer1/flask-restful-tutorial/blob/part-2/tests/test_config.py):**
 
 ```python
 # -*- coding: utf-8 -*-
@@ -649,6 +649,6 @@ This was a big part. To recap, we have:
 * Added a YAML-driven logging config with a non-blocking queue listener.
 * Added a CLI `env` command and grew the test suite.
 
-Commit this state and tag it as **v0.2.0**. With a tag in place, `python -m build` and `use_scm_version` will stamp the package as `0.2.0` rather than a development version. Full source code for this part is available on [GitHub](https://github.com/zobayer1/flask-restful-boilerplate/tree/part-2). Clone the repository and check out the `part-2` branch.
+Commit this state and tag it as **v0.2.0**. With a tag in place, `python -m build` and `use_scm_version` will stamp the package as `0.2.0` rather than a development version. Full source code for this part is available on [GitHub](https://github.com/zobayer1/flask-restful-tutorial/tree/part-2). Clone the repository and check out the `part-2` branch.
 
 In part 3, we will start filling in the `models/` and `services/` layers and build out a real `v1` resource with an error-handler base class. Stay tuned!!!
