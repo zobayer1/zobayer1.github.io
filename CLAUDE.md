@@ -45,6 +45,10 @@ overrides:
   `pageviews.proxy` to the service worker's `interceptor.urlPrefixes`. The service worker is
   cache-first and ignores `Cache-Control`, so without this it stores the Worker's response on
   first visit and replays it until the next deploy rotates `cacheName` — freezing every count.
+  The same worker has scope `/`, so it also controls the other GitHub Pages sites served from
+  this domain: `/cse-221` (zobayer1/cse-221) and `/elastic-migrate` (zobayer1/elastic-migrate).
+  They are listed under `pwa.cache.deny_paths` in `_config.yml`; without that, it served stale
+  copies of their pages until a hard reload. Add any new project site on this domain there.
 - `_data/` (`authors.yml`, `contact.yml`, `media.yml`, `share.yml`, `locales/`, `origin/`) —
   vendored wholesale from the theme's *source* repo (not the gem), so it is invisible drift: the
   gem ships its own copies and these silently win. Only `contact.yml` carries local edits (a

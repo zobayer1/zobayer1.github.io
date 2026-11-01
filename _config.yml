@@ -152,6 +152,8 @@ pwa:
     # shares the same domain name as the current website.
     deny_paths:
       # - "/example"  # URLs match `<SITE_URL>/example/*` will not be cached by the PWA
+      - "/cse-221" # CSE 221 course site (zobayer1/cse-221)
+      - "/elastic-migrate" # elastic-migrate docs (zobayer1/elastic-migrate)
 
 paginate: 10
 
