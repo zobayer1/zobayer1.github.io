@@ -199,6 +199,28 @@ after the change is committed.
   `https://storage.googleapis.com/glitchfest-pub` (`cdn:` in `_config.yml`) — a public
   Google Cloud Storage bucket served over Google's own TLS.
 
+## Agent tools (`agents/tools/`)
+
+Reusable scripts that agents wrote while authoring posts. `agents/tools/README.md` indexes them
+with what each one does and how to run it. Read it before making figures, diagrams or a PDF
+handout for a post. Extend an existing tool before writing a new one, and give every new tool a
+README entry. `agents` is in Jekyll's `exclude:` list, so nothing in it is published.
+
+- **`agents/tools/recursion/`** holds the figures and the practice-problem PDF for "Don't Fear
+  Recursion". Two of its files are the starting point for any new algorithm figure:
+  `post_figures.py` has the Chirpy-matched light/dark SVG primitives, and `practice_figures.py`
+  has `ladder()` and the call-tree renderers, which draw from real traced runs.
+  `check_solutions.py` and `fuzz_solutions.py` must both pass before the PDF is rebuilt or
+  republished.
+- **`agents/tools/preview/local.yml`** is a config override for previewing a production build
+  locally: empty `cdn`, with analytics, pageviews and the PWA off. The README has the screenshot
+  loop.
+- **Post media convention:** figures are 720px SVGs in light and dark variants, included with
+  `{: .light }` and `{: .dark }`. They are uploaded to `gs://glitchfest-pub/posts/YYYYMMDD/` and
+  referenced as `/posts/YYYYMMDD/name.svg`; the `cdn` prefix is added at build time. Other files,
+  such as PDFs, are linked by their full bucket URL. Uploading publishes, so confirm with the
+  owner first.
+
 ## The npm / Node tooling caveat
 
 `package.json`, `rollup.config.js`, `purgecss.config.js`, the stylelint config, husky, and

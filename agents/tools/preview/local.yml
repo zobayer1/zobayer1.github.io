@@ -1,0 +1,26 @@
+# Config override for previewing a production build locally, before images
+# are uploaded and before anything is published. Layer it over _config.yml:
+#
+#   JEKYLL_ENV=production bundle exec jekyll b -d /tmp/site \
+#     --config _config.yml,agents/tools/preview/local.yml
+#
+# - cdn is emptied so /posts/YYYYMMDD/*.svg resolve to local copies: copy the
+#   generated figures into /tmp/site/posts/YYYYMMDD/ after building.
+# - GoatCounter, pageviews and the PWA service worker are switched off so a
+#   local preview never records a hit or caches anything. `id: ""` (not a bare
+#   `id:`) is needed: a null value does not override the base config.
+# - Production mode is used because the assets/lib submodule (development-only
+#   static assets) is usually not checked out; production loads them from
+#   jsDelivr instead.
+cdn: ""
+url: ""
+analytics:
+  goatcounter:
+    id: ""
+  google:
+    id: ""
+pageviews:
+  provider:
+  proxy:
+pwa:
+  enabled: false

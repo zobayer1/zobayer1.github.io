@@ -225,6 +225,7 @@ exclude:
   - "*.config.js"
   - package*.json
   - worker
+  - agents
 
 jekyll-archives:
   enabled: [categories, tags]
