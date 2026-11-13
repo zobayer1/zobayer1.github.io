@@ -4,7 +4,8 @@ Scripts written by coding agents (Claude Code) while authoring posts, kept so th
 outputs can be rebuilt and the techniques reused. Nothing here is part of the
 site: `agents` is in the `exclude:` list in `_config.yml`.
 
-Requirements: system `python3` (with `pygments` for the PDF), `gcc`,
+Requirements: system `python3` (with `pygments` for the PDF), `gcc`, the Noto Sans,
+Noto Sans Mono and Noto Sans Bengali fonts,
 `google-chrome` for rendering and printing, `pdftoppm`/`pdftotext` for
 checking PDFs, and `gsutil` for uploading. Run scripts with `python3 -I -B` so
 they neither import from the working directory nor leave `__pycache__` behind.
@@ -18,7 +19,8 @@ bucket under `gs://glitchfest-pub/posts/20261114/`.
 | --- | --- |
 | `post_figures.py` | Generates the post's figures as light/dark SVG pairs (`trust`, `trust-fib`, `focus`, `ladder`, `down-up`, `stack`, `fib-tree`, `hanoi`). Also holds the shared SVG primitives: Chirpy-matched palettes, `doc()`, `text()`, `pill()`, `frame()`, `sealed()`. |
 | `practice_figures.py` | Generates the 21 call-sequence figures in the practice PDF by running each recursion in Python and recording every call. Reusable: `ladder()` for linear recursion, `Trace`, `layout()`/`walk()` for call trees, `badge()`. |
-| `build_practice_pdf.py` | Builds the A4 practice PDF from `PROBLEMS` (statements, Input/Output boxes, explanations) and the C code in `practice_source.md`, then prints it with headless Chrome. |
+| `build_practice_pdf.py` | Builds the A4 practice PDF from `PROBLEMS` (statements, Input/Output boxes, explanations) and the C code in `practice_source.md`, then prints it with headless Chrome. `--lang bn` builds the Bangla edition. |
+| `practice_text_bn.py` | Bangla prose for `--lang bn`: titles, statements, group headings, explanations and page-1 notes. Code, Input/Output, title, URLs and figures are shared with the English edition. Its docstring sets the register: everyday spoken Bangla, with English CS terms written in Bangla script. |
 | `practice_source.md` | The 20 C solutions, as the `c` code blocks of the retired practice post. The builder and both checkers read the blocks in order. |
 | `check_solutions.py` | Compiles every solution exactly as the PDF prints it, with `-Wall -Wextra -pedantic -Werror`. Feeds it the PDF's Input box and compares the output with the Output box. |
 | `fuzz_solutions.py` | Runs each solution on random inputs against a plain Python reference, and replays Tower of Hanoi moves for legality. Fixed seed. |
@@ -31,7 +33,8 @@ python3 -I -B $T/check_solutions.py && python3 -I -B $T/fuzz_solutions.py
 python3 -I -B $T/post_figures.py $OUT/figs
 python3 -I -B $T/practice_figures.py $OUT/pfigs
 python3 -I -B $T/build_practice_pdf.py $T/practice_source.md $OUT/pfigs $OUT/practice.html $OUT/recursion-practice-problems.pdf
-gsutil cp $OUT/figs/*.svg $OUT/recursion-practice-problems.pdf gs://glitchfest-pub/posts/20261114/
+python3 -I -B $T/build_practice_pdf.py $T/practice_source.md $OUT/pfigs $OUT/bn.html $OUT/recursion-practice-problems-bn.pdf --lang bn
+gsutil cp $OUT/figs/*.svg $OUT/recursion-practice-problems*.pdf gs://glitchfest-pub/posts/20261114/
 ```
 
 ## `preview/`: checking a post before it is published

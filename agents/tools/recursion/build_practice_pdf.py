@@ -4,6 +4,9 @@ Usage: python3 build_practice_pdf.py SOURCE_MD FIG_DIR OUT_HTML [OUT_PDF]
   SOURCE_MD  practice_source.md; its 20 ```c blocks are the solutions, in order
   FIG_DIR    output of practice_figures.py
   OUT_PDF    if given, prints OUT_HTML to this PDF with headless Chrome
+  --lang bn  Bangla edition: prose comes from practice_text_bn.py, everything
+             else (title, URLs, code, Input/Output, figures) is unchanged
+  --bn-font  font family for Bangla glyphs; Latin text stays in Noto Sans
 
 Problem text, Input/Output boxes and explanations live in PROBLEMS below;
 check_solutions.py imports PROBLEMS and tests the code against those boxes.
@@ -15,7 +18,9 @@ The result is published at
 https://storage.googleapis.com/glitchfest-pub/posts/20261114/recursion-practice-problems.pdf
 """
 
+import argparse
 import html
+import os
 import re
 import sys
 
@@ -23,6 +28,7 @@ from pygments import highlight
 from pygments.formatters import HtmlFormatter
 from pygments.lexers import CLexer
 
+DEFAULT_BN_FONT = "Noto Sans Bengali"
 POST_URL = "https://zobayer.net/posts/dont-fear-recursion/"
 OLD_URL = "https://zobayer.blogspot.com/2009/12/cse-102-practice-recursions.html"
 
@@ -181,22 +187,45 @@ PROBLEMS = [
 ]
 
 
+UI_EN = {
+    "lang": "en",
+    "sub": ('A companion to <a href="{post}">Don\'t Fear Recursion</a>. Build its two habits: '
+            '<b>trust the function</b> when you write it, <b>focus on one step</b> when you trace it.'),
+    "rules": ("<b>Rules:</b> no loops and no global variables inside the recursive function. Whatever a step "
+              "needs travels in its parameters or comes back in its return value. That's the whole point of the exercise."),
+    "tip": ("<b>Try before you read on.</b> Every problem is followed by its solution, so cover it up and "
+            "write your own first. Solutions show only the recursive function; reading input and printing output is up to you. "
+            "The code is C, but the ideas carry over to any language."),
+    "contents": "Contents",
+    "how": "How it runs.",
+    "footer": ('Originally posted on my old blog, <a href="{old}">I, ME AND MYSELF !!!</a>, on December 8, 2009, with the '
+               'answers in separate documents. Rebuilt with the solutions inline, explained, and traced. Read the full article at '
+               '<a href="{post}">zobayer.net/posts/dont-fear-recursion</a>.'),
+}
+
+
 def inline(s):
     """`code` -> <code>; everything else is already HTML."""
     return re.sub(r"`([^`]+)`", lambda m: f"<code>{html.escape(m.group(1))}</code>", s)
 
 
-def main(post_md, fig_dir, out_html):
+def main(post_md, fig_dir, out_html, lang="en", bn_font=DEFAULT_BN_FONT):
+    ui, groups, texts = UI_EN, GROUPS, [(p[1], p[2], p[5]) for p in PROBLEMS]
+    if lang == "bn":
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        import practice_text_bn as bn
+        ui, groups, texts = bn.UI, bn.GROUPS, bn.PROBLEMS
+    ui = {k: v.format(post=POST_URL, old=OLD_URL) for k, v in ui.items()}
     blocks = re.findall(r"^```c\n(.*?)^```", open(post_md, encoding="utf-8").read(), flags=re.S | re.M)
     assert len(blocks) == len(PROBLEMS) == 20, (len(blocks), len(PROBLEMS))
     fmt = HtmlFormatter(style="default", cssclass="code")
     parts = []
     toc = {}
     group = None
-    for i, ((g, title, stmt, inp, outp, explain, figs), code) in enumerate(zip(PROBLEMS, blocks), 1):
+    for i, ((g, _, _, inp, outp, _, figs), (title, stmt, explain), code) in enumerate(zip(PROBLEMS, texts, blocks), 1):
         if g != group:
             group = g
-            name, intro = GROUPS[g]
+            name, intro = groups[g]
             parts.append(f'<h2 class="group">{name}</h2>')
             if intro:
                 parts.append(f'<p class="intro">{intro}</p>')
@@ -212,15 +241,15 @@ def main(post_md, fig_dir, out_html):
   </div>
   <div class="label">Solution</div>
   {highlight(code, CLexer(), fmt)}
-  <p class="explain"><b>How it runs.</b> {inline(explain)}</p>
+  <p class="explain"><b>{ui["how"]}</b> {inline(explain)}</p>
   {fig_html}
 </section>""")
 
     css = fmt.get_style_defs(".code")
-    toc_html = "".join(f'<div class="tgroup"><h4>{GROUPS[g][0]}</h4><ol>{"".join(items)}</ol></div>'
+    toc_html = "".join(f'<div class="tgroup"><h4>{groups[g][0]}</h4><ol>{"".join(items)}</ol></div>'
                        for g, items in toc.items())
     doc = f"""<!doctype html>
-<html lang="en">
+<html lang="{ui["lang"]}">
 <head>
 <meta charset="utf-8">
 <title>Don't Fear Recursion: 20 Practice Problems</title>
@@ -231,7 +260,7 @@ def main(post_md, fig_dir, out_html):
   @bottom-center {{ content: counter(page) " / " counter(pages); font: 8.5pt "Noto Sans", sans-serif; color: #6e7781; }}
 }}
 html {{ -webkit-print-color-adjust: exact; print-color-adjust: exact; }}
-body {{ font: 10pt/1.55 "Noto Sans", sans-serif; color: #24292f; margin: 0; }}
+body {{ font: 10pt/{1.7 if lang == "bn" else 1.55} "Noto Sans", "{bn_font}", sans-serif; color: #24292f; margin: 0; }}
 a {{ color: #0969da; text-decoration: none; }}
 code, pre {{ font-family: "Noto Sans Mono", monospace; }}
 code {{ font-size: 0.92em; background: #f6f8fa; border-radius: 4px; padding: 0.05em 0.3em; }}
@@ -276,18 +305,12 @@ footer {{ margin-top: 18px; border-top: 1px solid #d0d7de; padding-top: 8px; fon
 <header>
   <div class="kicker">zobayer.net</div>
   <h1>Don't Fear Recursion: 20 Practice Problems</h1>
-  <p class="sub">A companion to <a href="{POST_URL}">Don't Fear Recursion</a>. Build its two habits:
-  <b>trust the function</b> when you write it, <b>focus on one step</b> when you trace it.</p>
+  <p class="sub">{ui["sub"]}</p>
 </header>
-<div class="note info"><b>Rules:</b> no loops and no global variables inside the recursive function. Whatever a step
-needs travels in its parameters or comes back in its return value. That's the whole point of the exercise.</div>
-<div class="note tip"><b>Try before you read on.</b> Every problem is followed by its solution, so cover it up and
-write your own first. Solutions show only the recursive function; reading input and printing output is up to you.
-The code is C, but the ideas carry over to any language.</div>
-<nav class="toc"><h2>Contents</h2><div class="tcols">{toc_html}</div>
-<footer>Originally posted on my old blog, <a href="{OLD_URL}">I, ME AND MYSELF !!!</a>, on December 8, 2009, with the
-answers in separate documents. Rebuilt with the solutions inline, explained, and traced. Read the full article at
-<a href="{POST_URL}">zobayer.net/posts/dont-fear-recursion</a>.</footer></nav>
+<div class="note info">{ui["rules"]}</div>
+<div class="note tip">{ui["tip"]}</div>
+<nav class="toc"><h2>{ui["contents"]}</h2><div class="tcols">{toc_html}</div>
+<footer>{ui["footer"]}</footer></nav>
 {''.join(parts)}
 
 </body>
@@ -307,6 +330,14 @@ def print_pdf(out_html, out_pdf):
 
 
 if __name__ == "__main__":
-    main(*sys.argv[1:4])
-    if len(sys.argv) > 4:
-        print_pdf(sys.argv[3], sys.argv[4])
+    ap = argparse.ArgumentParser(description="Build the recursion practice PDF.")
+    ap.add_argument("source_md")
+    ap.add_argument("fig_dir")
+    ap.add_argument("out_html")
+    ap.add_argument("out_pdf", nargs="?", help="print the HTML to this PDF with headless Chrome")
+    ap.add_argument("--lang", choices=["en", "bn"], default="en", help="prose language (default en)")
+    ap.add_argument("--bn-font", default=DEFAULT_BN_FONT, help=f"font family for Bangla text (default {DEFAULT_BN_FONT})")
+    a = ap.parse_args()
+    main(a.source_md, a.fig_dir, a.out_html, a.lang, a.bn_font)
+    if a.out_pdf:
+        print_pdf(a.out_html, a.out_pdf)
