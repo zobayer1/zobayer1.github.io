@@ -11,7 +11,7 @@ order: 4
 
 ![Zobayer Hasan](/commons/avatar.png){: .right .w-25 .rounded-circle }
 
-Just a tech guy making a living in the world of software engineering.
+Just a tech guy making a living in the world of software engineering. The work itself is on my [resume](/resume/).
 
 Off the clock, I'm all about exploring new places, devouring books, gaming until the break of dawn, and bike rides that clear the mind. Synth-wave and electro-pop fuel my coding marathons.
 

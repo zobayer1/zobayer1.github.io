@@ -1,0 +1,330 @@
+---
+# `heading` replaces the visible <h1> only (local _layouts/page.html override). `title` stays
+# "resume" so the browser <title> resolves through `tabs.resume` in _data/locales/en.yml.
+# Markup lives here; styles in assets/css/resume.css, behavior in assets/js/resume.js.
+# The page works without JS: every card and section renders, details open natively, and only
+# the lens control and the timeline (both JS-built) are absent.
+heading: Zobayer Hasan
+icon: fas fa-file-lines
+order: 5
+---
+
+<link rel="stylesheet" href="{{ '/assets/css/resume.css' | relative_url }}">
+
+<div class="rz" data-lens="all">
+
+  <header class="rz-hero">
+    <!-- Chirpy hides the page <h1> below 850px and shows the tab title in the topbar;
+         this stands in for it there, so the name never drops off a small screen. -->
+    <p class="rz-name">Zobayer Hasan</p>
+    <p class="rz-kicker">Solutions Architect · Software Engineering Leader</p>
+    <p class="rz-lead">
+      <span data-for="all">13+ years building national-scale systems: voter registration for 120 million citizens, vehicle registration and licensing for four governments, and products in encrypted communication, education and healthcare.</span>
+      <span data-for="architect">Platforms built to outlast their contracts: one platform family deployed by four governments, and two national systems carried to government handover in 2026, one of them after twelve years.</span>
+      <span data-for="ic">Still writes the hard parts: the clustering behind a voter roll of 120 million, a Signal Protocol implementation from scratch in C++, and a 60,000-line open-source dashboard, solo.</span>
+      <span data-for="lead">Hired 50+ engineers over eight years, five of them ICPC World Finalists. Engineers trained under my supervision have gone on to Google, Agoda, Booking.com and bKash.</span>
+      <span data-for="ai">Conversational AI since 2017, GPT-3 in a children's product in 2022, and now agentic platforms: MCP servers, tool harnesses and multi-agent delivery.</span>
+      <span data-for="security">Security as architecture: end-to-end encryption built from the protocol up, signed licenses verified offline in four countries, and anti-abuse defenses built under sustained attack.</span>
+    </p>
+    <ul class="rz-contact">
+      <li><i class="fas fa-location-dot" aria-hidden="true"></i>Dhaka, Bangladesh</li>
+      <li><a href="mailto:zobayer1@gmail.com"><i class="fas fa-envelope" aria-hidden="true"></i>zobayer1@gmail.com</a></li>
+      <li><a href="https://www.linkedin.com/in/zobayer-hasan/"><i class="fab fa-linkedin" aria-hidden="true"></i>LinkedIn</a></li>
+      <li><a href="https://github.com/zobayer1"><i class="fab fa-github" aria-hidden="true"></i>GitHub</a></li>
+    </ul>
+  </header>
+
+  <nav class="rz-lens" aria-label="Read this resume as">
+    <span class="rz-lens-label">Read as</span>
+    <button type="button" data-lens-btn="all" aria-pressed="true">Everything</button>
+    <button type="button" data-lens-btn="architect" aria-pressed="false">Architect</button>
+    <button type="button" data-lens-btn="ic" aria-pressed="false">Builder</button>
+    <button type="button" data-lens-btn="lead" aria-pressed="false">Leader</button>
+    <button type="button" data-lens-btn="ai" aria-pressed="false">AI</button>
+    <button type="button" data-lens-btn="security" aria-pressed="false">Security</button>
+  </nav>
+
+  <section class="rz-stats" aria-label="At a glance">
+    <div class="rz-stat" data-tags="architect ic">
+      <b data-count="120" data-suffix="M">120M</b>
+      <span>citizens on the voter-roll platform</span>
+    </div>
+    <div class="rz-stat" data-tags="architect security">
+      <b data-count="4">4</b>
+      <span>national governments on one platform family</span>
+    </div>
+    <div class="rz-stat" data-tags="lead architect">
+      <b data-count="13" data-suffix="+">13+</b>
+      <span>years, four titles, one employer</span>
+    </div>
+    <div class="rz-stat" data-tags="lead">
+      <b data-count="50" data-suffix="+">50+</b>
+      <span>engineers hired, five ICPC World Finalists</span>
+    </div>
+    <div class="rz-stat" data-tags="ai">
+      <b data-count="2017" data-from="2000">2017</b>
+      <span>my first conversational AI product</span>
+    </div>
+  </section>
+
+  <section class="rz-section" id="work" aria-labelledby="work-h">
+    <h2 id="work-h">Work</h2>
+    <p class="rz-hint">One line each; open a card for the detail.<span class="rz-js-only"> Pick a lens above and the matching work moves to the front.</span></p>
+
+    <div class="rz-cards">
+
+      <article class="rz-card" id="voter-roll" data-tags="architect ic ai">
+        <h3>National voter registration</h3>
+        <p class="rz-meta">BVRS2 · Bangladesh Election Commission · 2019 – 2026</p>
+        <p class="rz-proof"><b>120M</b> citizens</p>
+        <p class="rz-what">Biometric deduplication and adjudication for the national voter roll, carried to government handover in 2026.</p>
+        <details>
+          <summary>Details</summary>
+          <ul>
+            <li>Face-match clustering on Apache Spark: √N bucketing into 10,000 clusters of 10,000 faces cut roughly 5×10<sup>15</sup> all-pairs comparisons to about 10<sup>12</sup>.</li>
+            <li>Low-confidence embeddings are flagged before comparison and go to human adjudicators, so no citizen leaves the roll on the model's word alone.</li>
+            <li>Architected the adjudication platform around it: job queues, verdict and notification streams, and a decision history kept for audit.</li>
+            <li>Earlier, as a software engineer: full-text search over 100M+ citizen records in under 200 ms, on Elasticsearch with n-gram indices.</li>
+          </ul>
+          <p class="rz-prov">About 70% of commits across the backend and the embedding-model deployment cluster.</p>
+        </details>
+        <p class="rz-chips"><span>Architect</span><span>Builder</span><span>AI</span></p>
+      </article>
+
+      <article class="rz-card" id="vehicles" data-tags="architect security ic">
+        <h3>Vehicle registration &amp; licensing</h3>
+        <p class="rz-meta">One platform family · four national governments · 2013 – 2026</p>
+        <p class="rz-proof rz-flags"><span>Bangladesh</span><span>Tajikistan</span><span>Nepal</span><span>Moldova</span></p>
+        <p class="rz-what">Registration, licensing and plate production, built for Bangladesh's transport authority and deployed by three more governments.</p>
+        <details>
+          <summary>Details</summary>
+          <ul>
+            <li>My first project, in 2013: an ECDSA-signed license entitlement, verified offline on edge devices. It shipped in all four countries and is still in service.</li>
+            <li>Tajikistan (2014 – 2026): core developer, later architect, on driving licenses and vehicle registration, with Interpol I-24/7 screening. Handed over in 2026.</li>
+            <li>Nepal (2016 – 2022): core developer, then lead for the production, QA and inventory modules of embossed number plates.</li>
+            <li>Moldova: delivered end to end, nine years in production. Bangladesh: chip-writing for smart card licenses and an RFID network across Dhaka.</li>
+          </ul>
+        </details>
+        <p class="rz-chips"><span>Architect</span><span>Security</span><span>Builder</span></p>
+      </article>
+
+      <article class="rz-card" id="commchat" data-tags="security architect ic ai">
+        <h3>CommChat</h3>
+        <p class="rz-meta">Built for CommChat AG · <a href="https://commchat.com">commchat.com</a> · 2021 – present</p>
+        <p class="rz-proof"><b>E2EE</b> on five clients</p>
+        <p class="rz-what">End-to-end encrypted collaboration for on-premise enterprise. One of its primary architects, and owner of security.</p>
+        <details>
+          <summary>Details</summary>
+          <ul>
+            <li>The Signal Protocol design, implemented from scratch in C++; reworked in 2026 for post-quantum readiness.</li>
+            <li>Every device is its own cryptographic identity. Messages travel only as ciphertext over MQTT, never through the API servers.</li>
+            <li>Agentic automation runs inside the client, the only place plaintext exists: MCP servers, connectors and user-defined tools.</li>
+            <li>Python, Go and Node.js services with Kafka and Celery; desktop, mobile and web clients; about 30,000 users in beta.</li>
+          </ul>
+        </details>
+        <p class="rz-chips"><span>Security</span><span>Architect</span><span>Builder</span><span>AI</span></p>
+      </article>
+
+      <article class="rz-card" id="alifi" data-tags="ai lead architect">
+        <h3>Alifi, from KinderMate</h3>
+        <p class="rz-meta">Child-safe learning, now AI-authored homeschooling · 2017 – present</p>
+        <p class="rz-proof rz-gens"><span><b>2017</b> speech + scripts</span><span><b>2022</b> GPT-3</span><span><b>2024</b> multimodal</span><span><b>2025</b> agentic</span></p>
+        <p class="rz-what">One conversational character, carried across three generations of AI, grew into an agentic homeschooling platform.</p>
+        <details>
+          <summary>Details</summary>
+          <ul>
+            <li>KinderMate (2017 – 2022): 100k+ downloads and about 28,000 profiles, built to COPPA, GDPR and local child-protection law.</li>
+            <li>Built its most popular feature, an animated character children talk with, and moved it onto the GPT-3 completions API in 2022, before chat-tuned APIs existed.</li>
+            <li>Alifi (since 2025): the model drafts the course, a parent or teacher approves it, and child-development specialists vet every item.</li>
+            <li>Seen-content tracking across Redis, PostgreSQL and Spark, so a lesson a child has watched never comes back.</li>
+          </ul>
+        </details>
+        <p class="rz-chips"><span>AI</span><span>Leader</span><span>Architect</span></p>
+      </article>
+
+      <article class="rz-card" id="agentic" data-tags="lead ai">
+        <h3>Agentic delivery</h3>
+        <p class="rz-meta">My team at TigerIT · 2024 – present</p>
+        <p class="rz-proof"><b>6</b> engineers, plus agents</p>
+        <p class="rz-what">A multi-agent development process: agents plan, review, implement, and find and fix bugs before work reaches people.</p>
+        <details>
+          <summary>Details</summary>
+          <ul>
+            <li>Runs on in-house tooling that connects agents to local resources.</li>
+            <li>Fully agentic testing before human QA, and automated smoke tests after every deploy.</li>
+          </ul>
+        </details>
+        <p class="rz-chips"><span>Leader</span><span>AI</span></p>
+      </article>
+
+      <article class="rz-card" id="modernization" data-tags="architect lead">
+        <h3>Platform modernization</h3>
+        <p class="rz-meta">Government platforms and the KinderMate/Alifi backend · 2024 – 2026</p>
+        <p class="rz-proof rz-swapline"><b>Oracle</b> → <b>PostgreSQL</b></p>
+        <p class="rz-what">A cost-driven move off Oracle across both product lines, led as an architect.</p>
+        <details>
+          <summary>Details</summary>
+          <ul>
+            <li>Standardized the data layer on PostgreSQL and reworked the JPA layer for its dialect.</li>
+            <li>Replaced Oracle WebLogic with WildFly and moved the Java services onto a current JDK.</li>
+            <li>Retired Oracle licensing from every later deployment.</li>
+          </ul>
+        </details>
+        <p class="rz-chips"><span>Architect</span><span>Leader</span></p>
+      </article>
+
+      <article class="rz-card" id="bbstat" data-tags="ic ai">
+        <h3>bbstat</h3>
+        <p class="rz-meta"><a href="https://github.com/zobayer1/bbstat">github.com/zobayer1/bbstat</a> · 2026 · sole author, ~60,000 lines</p>
+        <p class="rz-proof"><b>100+</b> repositories</p>
+        <p class="rz-what">An open-source engineering-activity dashboard, in production at TigerIT, that ingests Bitbucket history under a hard API budget.</p>
+        <details>
+          <summary>Details</summary>
+          <ul>
+            <li>Adaptive rate control that found an undocumented burst limit beneath the vendor's published hourly cap.</li>
+            <li>A read-only MCP server, so LLM agents can query the dataset.</li>
+            <li>TypeScript, Fastify, Vue 3, PostgreSQL 17, Redis and Docker, with tests and documentation.</li>
+          </ul>
+        </details>
+        <p class="rz-chips"><span>Builder</span><span>AI</span></p>
+      </article>
+
+      <article class="rz-card" id="panacea" data-tags="architect ai">
+        <h3>Panacea</h3>
+        <p class="rz-meta">Mobile primary care · Jamalpur and Chittagong · 2019 – 2022</p>
+        <p class="rz-proof"><b>~5,000</b> patients in the pilot</p>
+        <p class="rz-what">Primary care for health camps and roaming field agents, built with doctors to Bangladesh DG Health standards.</p>
+        <details>
+          <summary>Details</summary>
+          <ul>
+            <li>HL7 and FHIR interoperability with Pentacomp, and IoT diagnostics for blood pressure, temperature and blood sugar.</li>
+            <li>Prototyped a clinician-only AI agent grounded in a symptom–condition graph that physicians can correct for regional prevalence.</li>
+          </ul>
+        </details>
+        <p class="rz-chips"><span>Architect</span><span>AI</span></p>
+      </article>
+
+    </div>
+  </section>
+
+  <section class="rz-section" id="career" aria-labelledby="career-h">
+    <h2 id="career-h">Career</h2>
+    <p class="rz-hint">TigerIT Bangladesh Ltd., Dhaka · June 2013 – present. Promoted inside the long-running systems I stayed with.</p>
+    <ol class="rz-steps">
+      <li style="--i:0" data-tags="ic security">
+        <b>Software Engineer</b>
+        <span class="rz-when">Jun 2013 – Apr 2019</span>
+        <span>Core developer on four national platforms.</span>
+      </li>
+      <li style="--i:1" data-tags="ic ai">
+        <b>Principal Software Engineer</b>
+        <span class="rz-when">Apr 2019 – Apr 2020</span>
+        <span>Face-match clustering for the voter roll.</span>
+      </li>
+      <li style="--i:2" data-tags="architect lead security">
+        <b>Solutions Architect</b>
+        <span class="rz-when">Apr 2020 – Jul 2024</span>
+        <span>The BVRS2 platform; led Nepal's modules.</span>
+      </li>
+      <li style="--i:3" data-tags="architect lead ai security">
+        <b>Senior Solutions Architect</b>
+        <span class="rz-when">Jul 2024 – present</span>
+        <span>Agentic AI, two handovers, a team of six.</span>
+      </li>
+    </ol>
+
+    <div class="rz-tl-wrap" hidden>
+      <div class="rz-tl" aria-label="Timeline of projects, teaching and community work, 2013 to 2026"></div>
+    </div>
+    <script type="application/json" id="rz-tl-data">
+      [
+        { "label": "Bangladesh EVR", "lane": "gov", "start": 2013.45, "end": 2018.5, "card": "vehicles", "tags": "architect security ic" },
+        { "label": "Tajikistan GAI", "lane": "gov", "start": 2014.0, "end": 2026.1, "card": "vehicles", "tags": "architect security ic" },
+        { "label": "Nepal Everest", "lane": "gov", "start": 2016.45, "end": 2022.45, "card": "vehicles", "tags": "architect lead ic" },
+        { "label": "BVRS2 voter roll", "lane": "gov", "start": 2019.25, "end": 2026.3, "card": "voter-roll", "tags": "architect ic ai" },
+        { "label": "Modernization", "lane": "gov", "start": 2024.5, "end": 2026.5, "card": "modernization", "tags": "architect lead" },
+        { "label": "KinderMate", "lane": "prod", "start": 2017.0, "end": 2022.9, "card": "alifi", "tags": "ai lead" },
+        { "label": "Panacea", "lane": "prod", "start": 2019.0, "end": 2022.9, "card": "panacea", "tags": "architect ai" },
+        { "label": "CommChat", "lane": "prod", "start": 2021.0, "end": 2026.9, "card": "commchat", "tags": "security architect ic ai" },
+        { "label": "Agentic delivery", "lane": "prod", "start": 2024.5, "end": 2026.9, "card": "agentic", "tags": "lead ai" },
+        { "label": "Alifi", "lane": "prod", "start": 2025.45, "end": 2026.9, "card": "alifi", "tags": "ai lead" },
+        { "label": "bbstat", "lane": "prod", "start": 2026.0, "end": 2026.9, "card": "bbstat", "tags": "ic ai" },
+        { "label": "UIU contest trainer", "lane": "edu", "start": 2013.1, "end": 2017.85, "card": "beyond", "tags": "lead" },
+        { "label": "ICPC Asia setter", "lane": "edu", "start": 2014.0, "end": 2016.95, "card": "beyond", "tags": "lead ic" },
+        { "label": "IUT trainer", "lane": "edu", "start": 2015.35, "end": 2016.95, "card": "beyond", "tags": "lead" },
+        { "label": "Wargaming Supertest", "lane": "edu", "start": 2016.0, "end": 2026.9, "card": "beyond", "tags": "lead" },
+        { "label": "BD Programmers", "lane": "edu", "start": 2013.0, "end": 2026.9, "card": "beyond", "tags": "lead" },
+        { "label": "BRAC adjunct", "lane": "edu", "start": 2025.42, "end": 2026.9, "card": "beyond", "tags": "lead" }
+      ]
+    </script>
+  </section>
+
+  <section class="rz-section" id="skills" aria-labelledby="skills-h">
+    <h2 id="skills-h">Toolbox</h2>
+    <dl class="rz-skills">
+      <div data-tags="ai"><dt>AI &amp; agents</dt><dd>MCP servers, tool harnesses, agent orchestration, LLM integration, embeddings, TensorFlow</dd></div>
+      <div data-tags="architect"><dt>Architecture</dt><dd>event-driven systems, human-in-the-loop workflows, offline verification, multi-country deployment, HL7 / FHIR, Interpol I-24/7</dd></div>
+      <div data-tags="security"><dt>Security</dt><dd>end-to-end encryption, ECDSA, post-quantum readiness, offline licensing, smart cards, anti-abuse</dd></div>
+      <div data-tags="ic"><dt>Languages</dt><dd>Java, Python, C++, Go, TypeScript, C#, SQL</dd></div>
+      <div data-tags="ic architect"><dt>Backend &amp; data</dt><dd>Spring and Java EE, WildFly, Node.js, Fastify, Flask, Kafka, Celery, PostgreSQL, Oracle, Redis, Elasticsearch, Apache Spark</dd></div>
+      <div data-tags="ic"><dt>Clients</dt><dd>React, Vue, Angular, native Android and iOS, Windows / macOS / Linux desktop, PWA</dd></div>
+      <div data-tags="architect"><dt>Infrastructure</dt><dd>AWS, Docker, on-premise, MQTT, WebRTC with LiveKit and Janus, GitHub Actions, Jenkins</dd></div>
+    </dl>
+  </section>
+
+  <section class="rz-section" id="beyond" aria-labelledby="beyond-h">
+    <h2 id="beyond-h">Beyond the day job</h2>
+    <div class="rz-beyond">
+      <div data-tags="lead">
+        <h3>Teaching</h3>
+        <ul>
+          <li><b>Adjunct Lecturer</b>, BRAC University <span class="rz-when">2025 –</span><br>Software Engineering and Algorithms</li>
+          <li><b>Curriculum advisor</b>, AIUB and BRAC University <span class="rz-when">2024, 2025</span></li>
+          <li><b>Contest trainer</b>, UIU <span class="rz-when">2013 – 2017</span> and IUT <span class="rz-when">2015 – 2016</span></li>
+        </ul>
+      </div>
+      <div data-tags="lead ic">
+        <h3>Community</h3>
+        <ul>
+          <li><b>ICPC Asia</b> problem setter, Dhaka and Bangkok <span class="rz-when">2014 – 2016</span></li>
+          <li><b>Code Samurai</b> chief judge <span class="rz-when">2022, 2024</span>; <b>VisionX</b> judge <span class="rz-when">2025</span></li>
+          <li><b>BD Programmers</b>, founder of the Facebook community of nearly 50,000 students and developers <span class="rz-when">2013 –</span></li>
+          <li><b>World of Warships</b> Supertester since 2016, test coordinator since 2024 (volunteer)</li>
+        </ul>
+      </div>
+      <div data-tags="ai lead">
+        <h3>Speaking</h3>
+        <ul>
+          <li>AI-agent-supported development, and moving CS curricula from coding toward engineering</li>
+          <li><b>BRAC University</b> CSE Research Day <span class="rz-when">Jun 2026</span></li>
+          <li><b>Jahangirnagar University</b> CSE alumni AGM <span class="rz-when">Aug 2026</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="rz-section" id="education" aria-labelledby="education-h">
+    <h2 id="education-h">Education &amp; languages</h2>
+    <div class="rz-boxes">
+      <div class="rz-box">
+        <h3>Education</h3>
+        <ul>
+          <li><b>M.Sc. in Computer Science and Engineering</b><br>BRAC University <span class="rz-when">2026</span><span class="rz-note">Masters fellowship on ICSETEP sub-project A44, AI-powered contradiction detection in evolving documents (ADB-financed)</span></li>
+          <li><b>B.Sc. in Computer Science and Engineering</b><br>University of Dhaka <span class="rz-when">2013</span></li>
+        </ul>
+      </div>
+      <div class="rz-box">
+        <h3>Languages</h3>
+        <ul class="rz-langs">
+          <li><b>Bangla</b><span class="rz-level">Native</span></li>
+          <li><b>English</b><span class="rz-level">Fluent</span><span class="rz-langnote">Teaches university courses and presents technically in English</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <p class="rz-coda">A two-page PDF is available on request. The <a href="{{ '/' | relative_url }}">writing on this site</a> shows how I think.</p>
+
+</div>
+
+<script src="{{ '/assets/js/resume.js' | relative_url }}" defer></script>

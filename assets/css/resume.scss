@@ -1,0 +1,829 @@
+---
+---
+
+/* Resume page (_tabs/resume.html). Sass, compiled by Jekyll to /assets/css/resume.css (the
+   empty front matter above is what makes Jekyll process it), and linked from the page itself
+   so no other page pays for it. Everything is scoped under .rz, and colors come from Chirpy's theme variables
+   (--text-color, --link-color, --card-bg ...) so the site's light/dark toggle just works.
+   The only local colors are the three timeline lanes, defined for both modes below using the
+   same selectors Chirpy uses for its own mode switch. */
+
+/* Courier Prime is the sidebar brand face; the theme stylesheet only loads weight 700. */
+@import url("https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&display=swap");
+
+/* This stylesheet loads on the resume page only, so these unscoped layout rules touch nothing
+   else. The right-hand panel (recently updated posts, trending tags) serves the blog; on a
+   resume it only narrows the column the cards and timeline need. Bootstrap's col-xl-9 on
+   <main> is widened back to the col-lg-11 the theme uses one breakpoint down. */
+#panel-wrapper {
+  display: none;
+}
+
+@media (min-width: 1200px) {
+  #main-wrapper main,
+  #tail-wrapper {
+    width: 91.666667%;
+  }
+}
+
+.rz {
+  --rz-mono: "Courier Prime", "Courier New", Courier, monospace;
+  --rz-gov: #2563a6;
+  --rz-prod: #0f7f71;
+  --rz-edu: #a8620c;
+  --rz-dim: 0.28;
+  --rz-radius: 0.6rem;
+  --rz-row: 1.6rem;
+  --rz-tl-label: 8.5rem;
+}
+
+html[data-mode="dark"] .rz {
+  --rz-gov: #8ab4f8;
+  --rz-prod: #5fcfba;
+  --rz-edu: #f0b25a;
+}
+
+@media (prefers-color-scheme: dark) {
+  html:not([data-mode]) .rz {
+    --rz-gov: #8ab4f8;
+    --rz-prod: #5fcfba;
+    --rz-edu: #f0b25a;
+  }
+}
+
+.rz-when {
+  font-family: var(--rz-mono);
+  font-size: 0.82rem;
+  color: var(--text-muted-color);
+  white-space: nowrap;
+}
+
+/* ---------- hero ---------- */
+
+.rz-name {
+  display: none;
+}
+
+@media (max-width: 849.98px) {
+  .rz-name {
+    display: block;
+    margin: 0.5rem 0 0.35rem;
+    font-family: Lato, "Microsoft Yahei", sans-serif;
+    font-size: 1.95rem;
+    line-height: 1.2;
+    color: var(--heading-color);
+  }
+
+  .rz .rz-kicker {
+    margin-top: 0;
+  }
+}
+
+.rz-kicker {
+  font-family: var(--rz-mono);
+  font-size: 0.95rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-muted-color);
+  margin: -0.75rem 0 0.9rem;
+}
+
+.rz-lead {
+  font-size: 1.28rem;
+  line-height: 1.55;
+  color: var(--heading-color);
+  max-width: 38em;
+  min-height: 4.65em; /* three lines: lens swaps do not shove the page */
+  margin: 0 0 1rem;
+}
+
+.rz-lead [data-for] {
+  display: none;
+}
+
+.rz[data-lens="all"] .rz-lead [data-for="all"],
+.rz[data-lens="architect"] .rz-lead [data-for="architect"],
+.rz[data-lens="ic"] .rz-lead [data-for="ic"],
+.rz[data-lens="lead"] .rz-lead [data-for="lead"],
+.rz[data-lens="ai"] .rz-lead [data-for="ai"],
+.rz[data-lens="security"] .rz-lead [data-for="security"] {
+  display: inline;
+}
+
+.rz-lead.rz-swap span {
+  animation: rz-rise 0.4s ease both;
+}
+
+@keyframes rz-rise {
+  from {
+    opacity: 0;
+    transform: translateY(0.35rem);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.content .rz-contact {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 1.4rem;
+  font-size: 0.95rem;
+  color: var(--text-muted-color);
+
+  li {
+    margin: 0;
+    padding: 0;
+  }
+
+  i {
+    margin-right: 0.45rem;
+    opacity: 0.75;
+  }
+}
+
+/* ---------- lens ---------- */
+
+.rz-lens {
+  display: none; /* JS-only control; the page reads fine without it */
+}
+
+.rz.rz-js .rz-lens {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.6rem 0.85rem;
+  margin: 0 0 1.75rem;
+  border-top: 1px solid var(--main-border-color);
+  border-bottom: 1px solid var(--main-border-color);
+  background: var(--main-bg);
+}
+
+/* Sticky under the 3rem topbar on wide screens only: below Chirpy's lg breakpoint the topbar
+   slides away on scroll and would leave a gap above a stuck bar. */
+@media (min-width: 850px) {
+  .rz.rz-js .rz-lens {
+    position: sticky;
+    top: 3rem;
+    z-index: 2;
+  }
+}
+
+.rz-lens-label {
+  font-family: var(--rz-mono);
+  font-size: 0.8rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted-color);
+  margin-right: 0.3rem;
+}
+
+.rz-lens button {
+  font: inherit;
+  font-size: 0.88rem;
+  line-height: 1.2;
+  padding: 0.32rem 0.85rem;
+  border-radius: 999px;
+  border: 1px solid var(--btn-border-color);
+  background: var(--button-bg);
+  color: var(--text-color);
+  cursor: pointer;
+  transition: background-color 0.15s, color 0.15s, border-color 0.15s;
+
+  &:hover {
+    border-color: var(--link-color);
+    color: var(--link-color);
+  }
+
+  &[aria-pressed="true"] {
+    background: var(--link-color);
+    border-color: var(--link-color);
+    color: var(--main-bg);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--link-color);
+    outline-offset: 2px;
+  }
+}
+
+/* Anything with data-tags fades when a lens is on and it does not match. */
+.rz [data-tags] {
+  transition: opacity 0.3s ease, filter 0.3s ease;
+}
+
+.rz[data-lens="architect"] [data-tags]:not([data-tags~="architect"]),
+.rz[data-lens="ic"] [data-tags]:not([data-tags~="ic"]),
+.rz[data-lens="lead"] [data-tags]:not([data-tags~="lead"]),
+.rz[data-lens="ai"] [data-tags]:not([data-tags~="ai"]),
+.rz[data-lens="security"] [data-tags]:not([data-tags~="security"]) {
+  opacity: var(--rz-dim);
+  filter: grayscale(0.7);
+}
+
+/* ---------- stats ---------- */
+
+.rz-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(8.5rem, 1fr));
+  gap: 1.1rem 1.5rem;
+  margin: 0 0 2.75rem;
+
+  b {
+    display: block;
+    font-family: var(--rz-mono);
+    font-weight: 700;
+    font-size: 2.55rem;
+    line-height: 1;
+    letter-spacing: -0.03em;
+    color: var(--heading-color);
+    font-variant-numeric: tabular-nums;
+  }
+
+  span {
+    display: block;
+    margin-top: 0.45rem;
+    font-size: 0.88rem;
+    line-height: 1.35;
+    color: var(--text-muted-color);
+  }
+}
+
+/* ---------- sections ---------- */
+
+.rz-section {
+  margin: 0 0 3rem;
+}
+
+.rz-section > h2 {
+  margin-bottom: 0.35rem;
+}
+
+.rz-hint {
+  font-size: 0.95rem;
+  color: var(--text-muted-color);
+  margin: 0 0 1.2rem;
+}
+
+.rz:not(.rz-js) .rz-js-only {
+  display: none;
+}
+
+/* ---------- cards ---------- */
+
+/* Cards in a row are equal height, and their parts line up across the row: each card spans
+   six rows of this grid and adopts them as a subgrid, so the title, meta line, number,
+   one-liner, details link and tags of side-by-side cards share row tracks. This relies on every
+   card having exactly those six children, in that order. Browsers without subgrid still get
+   equal heights from the default stretch, with the tags pinned to the bottom. */
+.rz-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 22rem), 1fr));
+  gap: 1rem;
+}
+
+/* `.rz-cards > .rz-card` outranks the plain `.rz-card { display: flex }` further down. */
+@supports (grid-template-rows: subgrid) {
+  .rz-cards > .rz-card {
+    display: grid;
+    grid-row: span 6;
+    grid-template-rows: subgrid;
+    row-gap: 0; /* the parent's gap belongs between cards, not inside them */
+  }
+
+  /* Each part sits at the top of its shared row track; only the tags sink to the bottom. */
+  .rz-cards > .rz-card > * {
+    align-self: start;
+  }
+
+  .rz-cards > .rz-card > .rz-chips {
+    align-self: end;
+  }
+}
+
+.rz-card {
+  display: flex;
+  flex-direction: column;
+  padding: 1rem 1.1rem 0.85rem;
+  border-radius: var(--rz-radius);
+  background: var(--card-bg);
+  box-shadow: var(--card-shadow);
+  scroll-margin-top: 7rem;
+
+  h3 {
+    font-size: 1.12rem;
+    margin: 0 0 0.2rem;
+  }
+
+  details {
+    margin: 0 0 0.6rem;
+  }
+
+  summary {
+    width: max-content;
+    font-size: 0.85rem;
+    color: var(--link-color);
+    cursor: pointer;
+    list-style: none;
+
+    &::-webkit-details-marker {
+      display: none;
+    }
+
+    &::before {
+      content: "+";
+      display: inline-block;
+      width: 0.9rem;
+      font-family: var(--rz-mono);
+      font-weight: 700;
+    }
+  }
+
+  details[open] summary::before {
+    content: "−";
+  }
+}
+
+.content .rz-card details ul {
+  margin: 0.5rem 0 0.25rem;
+  padding-inline-start: 1.1rem;
+  font-size: 0.93rem;
+
+  li {
+    margin: 0.3rem 0;
+    padding-left: 0.15rem;
+  }
+}
+
+.rz-meta {
+  font-size: 0.82rem;
+  color: var(--text-muted-color);
+  margin: 0 0 0.75rem;
+}
+
+.rz-proof {
+  font-size: 0.9rem;
+  color: var(--text-muted-color);
+  margin: 0 0 0.5rem;
+
+  b {
+    font-family: var(--rz-mono);
+    font-size: 1.65rem;
+    letter-spacing: -0.02em;
+    color: var(--heading-color);
+    margin-right: 0.3rem;
+  }
+}
+
+.rz-flags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+
+  span {
+    font-family: var(--rz-mono);
+    font-size: 0.82rem;
+    padding: 0.12rem 0.5rem;
+    border: 1px solid var(--btn-border-color);
+    border-radius: 0.3rem;
+    color: var(--heading-color);
+  }
+}
+
+.rz-gens {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  row-gap: 0.15rem;
+
+  span {
+    font-size: 0.8rem;
+    white-space: nowrap;
+  }
+
+  span + span::before {
+    content: "→";
+    margin: 0 0.4rem;
+  }
+
+  b {
+    font-size: 1rem;
+    margin-right: 0.2rem;
+  }
+}
+
+/* "Oracle → PostgreSQL": the retired name is struck through. */
+.rz-swapline b:first-child {
+  text-decoration: line-through;
+  text-decoration-thickness: 2px;
+  color: var(--text-muted-color);
+}
+
+.rz-what {
+  font-size: 0.98rem;
+  margin: 0 0 0.6rem;
+}
+
+.rz-prov {
+  font-size: 0.8rem;
+  color: var(--text-muted-color);
+  margin: 0.35rem 0 0;
+}
+
+.rz-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin: auto 0 0;
+
+  span {
+    font-family: var(--rz-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--text-muted-color);
+  }
+
+  span + span::before {
+    content: "·";
+    margin-right: 0.3rem;
+  }
+}
+
+/* A lens pulls its matching cards to the front and marks them; JS animates the move. */
+.rz[data-lens="architect"] .rz-card[data-tags~="architect"],
+.rz[data-lens="ic"] .rz-card[data-tags~="ic"],
+.rz[data-lens="lead"] .rz-card[data-tags~="lead"],
+.rz[data-lens="ai"] .rz-card[data-tags~="ai"],
+.rz[data-lens="security"] .rz-card[data-tags~="security"] {
+  order: -1;
+  box-shadow: var(--card-shadow), inset 3px 0 0 var(--link-color);
+}
+
+.rz-card.rz-hot {
+  box-shadow: var(--card-shadow), 0 0 0 2px var(--link-color);
+}
+
+.rz-flash {
+  animation: rz-flash 1.2s ease-out;
+}
+
+@keyframes rz-flash {
+  from {
+    box-shadow: 0 0 0 4px var(--link-color);
+  }
+}
+
+/* ---------- career staircase ---------- */
+
+.content .rz-steps {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 2.25rem;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  align-items: end;
+  gap: 0.6rem;
+
+  li {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    margin: 0 0 calc(var(--i) * 1.7rem);
+    padding: 0.6rem 0.7rem 0.55rem;
+    border-top: 3px solid var(--rz-gov);
+    background: linear-gradient(to bottom, color-mix(in srgb, var(--rz-gov) 9%, transparent), transparent 85%);
+    font-size: 0.86rem;
+    line-height: 1.35;
+  }
+
+  b {
+    font-size: 0.98rem;
+    color: var(--heading-color);
+  }
+}
+
+@media (max-width: 640px) {
+  .content .rz-steps {
+    display: flex;
+    flex-direction: column-reverse; /* latest title on top when stacked */
+    align-items: stretch;
+
+    li {
+      margin: 0;
+      border-top: 0;
+      border-left: 3px solid var(--rz-gov);
+      padding-left: 0.9rem;
+    }
+  }
+}
+
+/* ---------- timeline (built by assets/js/resume.js) ---------- */
+
+.rz-tl-wrap {
+  overflow-x: auto;
+  padding-bottom: 0.3rem;
+}
+
+.rz-tl {
+  position: relative;
+  display: grid;
+  grid-template-columns: var(--rz-tl-label) 1fr;
+  min-width: 42rem;
+  font-size: 0.78rem;
+}
+
+.rz-tl-axis {
+  position: relative;
+  height: 1.5rem;
+  border-bottom: 1px solid var(--main-border-color);
+}
+
+.rz-tl-tick {
+  position: absolute;
+  bottom: 0.2rem;
+  transform: translateX(-50%);
+  font-family: var(--rz-mono);
+  font-size: 0.72rem;
+  color: var(--text-muted-color);
+}
+
+.rz-tl-name {
+  padding: 0.55rem 0.6rem 0 0;
+  font-family: var(--rz-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  line-height: 1.3;
+  text-transform: uppercase;
+  color: var(--rz-lane);
+  border-bottom: 1px solid var(--main-border-color);
+}
+
+.rz-tl-track {
+  position: relative;
+  height: calc(var(--rows) * var(--rz-row) + 0.7rem);
+  border-bottom: 1px solid var(--main-border-color);
+  background-image: repeating-linear-gradient(
+    to right,
+    var(--main-border-color) 0 1px,
+    transparent 1px calc(100% / 14)
+  );
+}
+
+[data-lane="gov"] {
+  --rz-lane: var(--rz-gov);
+}
+
+[data-lane="prod"] {
+  --rz-lane: var(--rz-prod);
+}
+
+[data-lane="edu"] {
+  --rz-lane: var(--rz-edu);
+}
+
+.content a.rz-tl-bar {
+  position: absolute;
+  height: calc(var(--rz-row) - 0.3rem);
+  margin-top: 0.35rem;
+  display: flex;
+  align-items: center;
+  padding: 0 0.4rem;
+  border: 0;
+  border-left: 3px solid var(--rz-lane);
+  border-radius: 0.25rem;
+  background: color-mix(in srgb, var(--rz-lane) 15%, var(--main-bg));
+  color: var(--heading-color);
+  text-decoration: none;
+  white-space: nowrap;
+  overflow: hidden;
+  transition: background-color 0.15s, opacity 0.3s, filter 0.3s;
+
+  span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &:hover,
+  &.rz-hot {
+    background: color-mix(in srgb, var(--rz-lane) 32%, var(--main-bg));
+    color: var(--heading-color);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--link-color);
+    outline-offset: 1px;
+  }
+}
+
+.rz-tl-now {
+  position: relative;
+  grid-column: 2;
+  pointer-events: none;
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: 1.5rem;
+    bottom: 0;
+    left: var(--x);
+    border-left: 1.5px dashed var(--link-color);
+  }
+
+  &::after {
+    content: "now";
+    position: absolute;
+    top: 0;
+    left: var(--x);
+    transform: translateX(-50%);
+    padding: 0 0.25rem;
+    font-family: var(--rz-mono);
+    font-size: 0.72rem;
+    color: var(--link-color);
+    background: var(--main-bg);
+  }
+}
+
+@media (max-width: 640px) {
+  .rz {
+    --rz-tl-label: 6.5rem;
+  }
+
+  .rz-tl-tick.rz-odd {
+    visibility: hidden;
+  }
+}
+
+/* ---------- toolbox ---------- */
+
+.rz-skills {
+  margin: 0;
+
+  > div {
+    display: grid;
+    grid-template-columns: 9.5rem 1fr;
+    gap: 0.2rem 1rem;
+    padding: 0.55rem 0;
+    border-top: 1px solid var(--main-border-color);
+  }
+
+  dt {
+    font-family: var(--rz-mono);
+    font-size: 0.8rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--heading-color);
+    padding-top: 0.15rem;
+  }
+
+  dd {
+    margin: 0;
+    font-size: 0.95rem;
+  }
+}
+
+@media (max-width: 575px) {
+  .rz-skills > div {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ---------- beyond ---------- */
+
+.rz-beyond {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr)); /* 3 across on desktop */
+  gap: 1.5rem 2.5rem;
+}
+
+.rz-beyond h3,
+.rz-box h3 {
+  font-family: var(--rz-mono);
+  font-size: 0.85rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted-color);
+  margin: 0 0 0.6rem;
+}
+
+.content .rz-beyond ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+
+  li {
+    margin: 0 0 0.6rem;
+    padding: 0;
+    font-size: 0.93rem;
+    line-height: 1.45;
+  }
+}
+
+/* ---------- education & languages ---------- */
+
+.rz-boxes {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+  gap: 1rem;
+}
+
+.rz-box {
+  padding: 1rem 1.1rem;
+  border-radius: var(--rz-radius);
+  background: var(--card-bg);
+  box-shadow: var(--card-shadow);
+}
+
+.content .rz-box ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+
+  li {
+    margin: 0 0 0.8rem;
+    padding: 0;
+    font-size: 0.95rem;
+    line-height: 1.45;
+  }
+
+  li:last-child {
+    margin-bottom: 0;
+  }
+}
+
+/* Language name left, level pill right, the evidence line underneath. */
+.content .rz-langs li {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: baseline;
+  column-gap: 1rem;
+  row-gap: 0.2rem;
+}
+
+.rz-level {
+  font-family: var(--rz-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--link-color);
+  border: 1px solid currentcolor;
+  border-radius: 999px;
+  padding: 0.05rem 0.6rem;
+}
+
+.rz-langnote,
+.rz-note {
+  font-size: 0.85rem;
+  color: var(--text-muted-color);
+}
+
+.rz-langnote {
+  grid-column: 1 / -1;
+}
+
+.rz-note {
+  display: block;
+  margin-top: 0.2rem;
+}
+
+.rz-coda {
+  padding-top: 1.1rem;
+  border-top: 1px solid var(--main-border-color);
+  font-size: 0.95rem;
+  color: var(--text-muted-color);
+}
+
+/* ---------- motion and print ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .rz *,
+  .rz *::before {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+@media print {
+  .rz-lens,
+  .rz-tl-wrap,
+  .rz-js-only {
+    display: none !important;
+  }
+
+  .rz [data-tags] {
+    opacity: 1 !important;
+    filter: none !important;
+  }
+
+  .rz-card {
+    box-shadow: none !important;
+    border: 1px solid #ccc;
+    break-inside: avoid;
+  }
+}

@@ -154,6 +154,32 @@ to `main` and CI handles it. Notes:
 - Tag/category index pages are generated automatically by `jekyll-archives`
   (`/tags/:name/`, `/categories/:name/`).
 
+### Resume page (`/resume/`)
+
+Three files: `_tabs/resume.html` (markup), `assets/css/resume.scss` (compiled to
+`/assets/css/resume.css`) and `assets/js/resume.js`. Both assets are linked from the page itself,
+so no other page loads them. The tab is `.html`, not `.md`, so kramdown never touches the markup.
+Easy things to break:
+
+- **Titles:** the browser `<title>` comes from `resume: Resume` in `_data/locales/en.yml`, and the
+  visible `<h1>` from the `heading` override. Below 850px Chirpy hides that `<h1>`, so the hero
+  repeats the name in `.rz-name`.
+- **Page-only layout rules:** `resume.css` hides `#panel-wrapper` and widens `<main>`. That is safe
+  only because the stylesheet loads on this page alone; never move those rules into
+  `jekyll-theme-chirpy.scss`.
+- **Card structure:** work cards use CSS subgrid, so every `.rz-card` must have exactly six
+  children, in order: `h3`, `.rz-meta`, `.rz-proof`, `.rz-what`, `details`, `.rz-chips`. A card
+  with a missing or extra child breaks the alignment of its whole row.
+- **Lenses:** the "Read as" buttons set `data-lens` on `.rz`. CSS does the dimming and reordering
+  from each element's `data-tags` (lens ids: `architect ic lead ai security`). JS only animates and
+  mirrors the lens into `?lens=`, so `/resume/?lens=ai` is a shareable tailored view.
+- **Timeline:** built by JS from the JSON in `#rz-tl-data`; each bar's `card` is the id it opens.
+  Behavior lives in a separate file because the `compress` layout collapses inline scripts onto
+  one line, which breaks `//` comments.
+- **No JS:** everything still renders except the lens bar and the timeline.
+- **Content source:** the text is maintained in a private databank and copied here deliberately.
+  Make content changes there first; this page is a rendering of it.
+
 ### Last-modified dates
 
 `_plugins/posts-lastmod-hook.rb` derives each post's `last_modified_at` from **git history** (a
