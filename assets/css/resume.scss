@@ -732,13 +732,7 @@ html[data-mode="dark"] .rz {
   }
 }
 
-/* ---------- education & languages ---------- */
-
-.rz-boxes {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
-  gap: 1rem;
-}
+/* ---------- education ---------- */
 
 .rz-box {
   padding: 1rem 1.1rem;
@@ -764,15 +758,6 @@ html[data-mode="dark"] .rz {
   }
 }
 
-/* Language name left, level pill right, the evidence line underneath. */
-.content .rz-langs li {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  align-items: baseline;
-  column-gap: 1rem;
-  row-gap: 0.2rem;
-}
-
 .rz-level {
   font-family: var(--rz-mono);
   font-size: 0.75rem;
@@ -785,18 +770,56 @@ html[data-mode="dark"] .rz {
 }
 
 .rz-note {
+  display: block;
+  margin-top: 0.2rem;
   font-size: 0.85rem;
   color: var(--text-muted-color);
 }
 
-.rz-note {
-  display: block;
-  margin-top: 0.2rem;
+/* ---------- footer card: languages and the closing line ---------- */
+
+.rz-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem 2rem;
+  padding: 0.8rem 1.1rem;
+  border-radius: var(--rz-radius);
+  background: var(--card-bg);
+  box-shadow: var(--card-shadow);
+
+  p {
+    margin: 0;
+  }
+}
+
+.rz-foot-langs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.4rem 1.1rem;
+  font-size: 0.95rem;
+}
+
+/* A language and its level wrap as one unit. */
+.rz-lang {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  white-space: nowrap;
+}
+
+.rz-foot-label {
+  font-family: var(--rz-mono);
+  font-size: 0.8rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted-color);
+  margin-right: 0.3rem;
 }
 
 .rz-coda {
-  padding-top: 1.1rem;
-  border-top: 1px solid var(--main-border-color);
   font-size: 0.95rem;
   color: var(--text-muted-color);
 }
