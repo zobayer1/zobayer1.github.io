@@ -178,10 +178,28 @@ order: 5
         <p class="rz-chips"><span>Architect</span><span>Leader</span></p>
       </article>
 
+      <article class="rz-card" id="cloud" data-tags="architect ic">
+        <h3>Cloud and on-premise</h3>
+        <p class="rz-meta">KinderMate, CommChat and Alifi on AWS; government platforms on-premise · 2017 – present</p>
+        <p class="rz-proof"><b>S3 / MinIO</b> one interface, two targets</p>
+        <p class="rz-what">The client decides where it runs: government contracts forbid public cloud, and our own products go wherever cost is lowest. One S3-compatible storage interface serves both.</p>
+        <details>
+          <summary>Details</summary>
+          <ul>
+            <li>Containerized services on Amazon ECS across KinderMate, CommChat and Alifi, behind ELB for load balancing and service discovery.</li>
+            <li>Managed RDS PostgreSQL and ElastiCache, alongside self-managed Kafka on EC2, Redis and Elasticsearch, chosen service by service on cost.</li>
+            <li>S3 and CloudFront for KinderMate content; MinIO, through the same interface, for government deployments.</li>
+            <li>Self-hosted LiveKit and Janus media servers in AWS, moved off Twilio, with in-house redundancy and service discovery.</li>
+            <li>A modular monolith for KinderMate and microservices for CommChat; CI/CD on GitHub Actions, GitLab CI, Jenkins and Bitbucket Pipelines.</li>
+          </ul>
+        </details>
+        <p class="rz-chips"><span>Architect</span><span>Builder</span></p>
+      </article>
+
       <article class="rz-card" id="bbstat" data-tags="ic ai">
         <h3>bbstat</h3>
         <p class="rz-meta"><a href="https://github.com/zobayer1/bbstat">github.com/zobayer1/bbstat</a> · 2026 · sole author, ~60,000 lines</p>
-        <p class="rz-proof"><b>100+</b> repositories</p>
+        <p class="rz-proof"><b>800+</b> repositories</p>
         <p class="rz-what">An open-source engineering-activity dashboard, in production at TigerIT, that ingests Bitbucket history under a hard API budget.</p>
         <details>
           <summary>Details</summary>
@@ -273,7 +291,7 @@ order: 5
       <div data-tags="ic"><dt>Languages</dt><dd>Java, Python, C++, Go, TypeScript, C#, SQL</dd></div>
       <div data-tags="ic architect"><dt>Backend &amp; data</dt><dd>Spring and Java EE, WildFly, Node.js, Fastify, Flask, Kafka, Celery, PostgreSQL, Oracle, Redis, Elasticsearch, Apache Spark</dd></div>
       <div data-tags="ic"><dt>Clients</dt><dd>React, Vue, Angular, native Android and iOS, Windows / macOS / Linux desktop, PWA</dd></div>
-      <div data-tags="architect"><dt>Infrastructure</dt><dd>AWS, Docker, on-premise, MQTT, WebRTC with LiveKit and Janus, GitHub Actions, Jenkins</dd></div>
+      <div data-tags="architect"><dt>Infrastructure</dt><dd>AWS (ECS, EC2, RDS, ElastiCache, S3, CloudFront, ELB), Docker, MinIO, on-premise, MQTT, WebRTC with LiveKit and Janus, GitHub Actions, GitLab CI, Jenkins, Bitbucket Pipelines</dd></div>
     </dl>
   </section>
 
