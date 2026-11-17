@@ -5,7 +5,7 @@
    empty front matter above is what makes Jekyll process it), and linked from the page itself
    so no other page pays for it. Everything is scoped under .rz, and colors come from Chirpy's theme variables
    (--text-color, --link-color, --card-bg ...) so the site's light/dark toggle just works.
-   The only local colors are the three timeline lanes, defined for both modes below using the
+   The only local colors are the three timeline lanes and the lens bar tint, defined for both modes below using the
    same selectors Chirpy uses for its own mode switch. */
 
 /* Courier Prime is the sidebar brand face; the theme stylesheet only loads weight 700. */
@@ -31,6 +31,8 @@
   --rz-gov: #2563a6;
   --rz-prod: #0f7f71;
   --rz-edu: #a8620c;
+  --rz-lens-bg: #e8f1fb;
+  --rz-lens-border: #c9dcf2;
   --rz-dim: 0.28;
   --rz-radius: 0.6rem;
   --rz-row: 1.6rem;
@@ -41,6 +43,8 @@ html[data-mode="dark"] .rz {
   --rz-gov: #8ab4f8;
   --rz-prod: #5fcfba;
   --rz-edu: #f0b25a;
+  --rz-lens-bg: #1a2433;
+  --rz-lens-border: #2b3b52;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -48,6 +52,8 @@ html[data-mode="dark"] .rz {
     --rz-gov: #8ab4f8;
     --rz-prod: #5fcfba;
     --rz-edu: #f0b25a;
+    --rz-lens-bg: #1a2433;
+    --rz-lens-border: #2b3b52;
   }
 }
 
@@ -160,9 +166,9 @@ html[data-mode="dark"] .rz {
   gap: 0.4rem;
   padding: 0.6rem 0.85rem;
   margin: 0 0 1.75rem;
-  border-top: 1px solid var(--main-border-color);
-  border-bottom: 1px solid var(--main-border-color);
-  background: var(--main-bg);
+  border-top: 1px solid var(--rz-lens-border);
+  border-bottom: 1px solid var(--rz-lens-border);
+  background: var(--rz-lens-bg); /* opaque: the bar is sticky and cards scroll under it */
 }
 
 /* Sticky under the 3rem topbar on wide screens only: below Chirpy's lg breakpoint the topbar
@@ -231,7 +237,8 @@ html[data-mode="dark"] .rz {
 
 .rz-stats {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(8.5rem, 1fr));
+  /* At most three per row, so six stats sit 3x2 (2x3 on phones) instead of 5 and an orphan. */
+  grid-template-columns: repeat(auto-fit, minmax(max(8.5rem, 30%), 1fr));
   gap: 1.1rem 1.5rem;
   margin: 0 0 2.75rem;
 
@@ -777,14 +784,9 @@ html[data-mode="dark"] .rz {
   padding: 0.05rem 0.6rem;
 }
 
-.rz-langnote,
 .rz-note {
   font-size: 0.85rem;
   color: var(--text-muted-color);
-}
-
-.rz-langnote {
-  grid-column: 1 / -1;
 }
 
 .rz-note {
