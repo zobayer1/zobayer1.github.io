@@ -4,8 +4,9 @@ layout: default
 
 <!--
   Local override of the Chirpy `home` layout (copied from jekyll-theme-chirpy 7.5.0).
-  The only changes from upstream are the three blocks marked `LOCAL:` below, which add
-  a GoatCounter view count to each post card's meta row. Re-apply them after a theme bump.
+  The only changes from upstream are the blocks marked `LOCAL:` below: three add a
+  GoatCounter view count to each post card's meta row, and one adds the reading time.
+  Re-apply them after a theme bump.
 -->
 
 {% include lang.html %}
@@ -118,6 +119,10 @@ layout: default
                 <!-- posted date -->
                 <i class="far fa-calendar fa-fw me-1"></i>
                 {% include datetime.html date=post.date lang=lang %}
+
+                <!-- LOCAL: reading time, via the theme's own include so it matches the post page -->
+                <i class="far fa-clock fa-fw me-1"></i>
+                {% include read-time.html content=post.content lang=lang %}
 
                 <!-- categories -->
                 {% if post.categories.size > 0 %}

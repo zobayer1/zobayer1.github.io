@@ -23,8 +23,9 @@ the same path, so overrides are copies that drift from upstream and **must be re
 theme bump**. The resolved theme version is in `Gemfile.lock` (currently 7.5.0). Current
 overrides:
 
-- `_layouts/home.html` — copy of Chirpy 7.5.0's, plus three blocks marked `LOCAL:` that add a
-  GoatCounter view count to each post card's meta row. Diff against
+- `_layouts/home.html` — copy of Chirpy 7.5.0's, plus blocks marked `LOCAL:`: three add a
+  GoatCounter view count to each post card's meta row, and one adds the reading time through the
+  theme's `read-time.html`, so a card and its post page always agree. Diff against
   `$(bundle info --path jekyll-theme-chirpy)/_layouts/home.html` after upgrading and re-apply.
 - `_layouts/page.html` — copy of Chirpy 7.5.0's, plus one `LOCAL:` line letting front matter
   override just the `<h1>` via a `heading` key (used by `_tabs/about.md`). Setting `title` instead
@@ -56,7 +57,8 @@ overrides:
 - `assets/css/jekyll-theme-chirpy.scss` — Chirpy's designated customization entry point, not a
   shadow copy, so a theme bump does not invalidate it. Holds the sidebar brand font, the enlarged
   avatar, the widened sidebar (breakpoints must stay in sync with the theme's `lg`/`xxxl`), and
-  the `.pv-ready` visibility rule described under Page view counts.
+  the `.pv-ready` visibility rule described under Page view counts, and a phone-width rule that
+  hides the categories on post cards so the date, reading time and view count fit on one line.
 
 ## Page view counts
 

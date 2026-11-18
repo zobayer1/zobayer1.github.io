@@ -87,3 +87,16 @@
   position: relative;
   top: 1px;
 }
+
+/* Post-card meta row on phones. Date, reading time, categories and views need
+   ~450px, and the theme ellipsizes this row rather than wrapping it, so below
+   that the view count (last in the row) was the item cut off. Drop the
+   categories instead; they are also shown on the post itself. */
+@media (max-width: 575.98px) {
+  #post-list .card .card-body .post-meta {
+    .fa-folder-open,
+    .categories {
+      display: none;
+    }
+  }
+}
